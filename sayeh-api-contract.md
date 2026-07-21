@@ -31,6 +31,8 @@ Legend for status column: `TODO` = need method + req/resp body from backend dev.
 | PERMISSION_MGMT | TODO | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | TODO |
 | ROLE_MGMT | TODO | `/sayeh/manage/role_mgmt/` | سطح دسترسی | TODO |
 | [ACCOUNT_MGMT](#account_mgmt-get) | GET | `/sayeh/manage/account_mgmt/?id={id}` | لیست کاربران | DONE — [§6.1](#account_mgmt-get) |
+| [ACCOUNT_MGMT](#account_mgmt-post) | POST | `/sayeh/manage/account_mgmt/` | ایجاد کاربر | DONE — [§6.1b](#account_mgmt-post) |
+| [ACCOUNT_MGMT](#account_mgmt-put) | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put) |
 | [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-get) | GET | `/sayeh/manage/account_mgmt/{id}/profiles/` | لیست پروفایل‌های کاربر | DONE — [§6.2](#account_mgmt-profiles-get) |
 | IDENTITY_MGMT | TODO | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | TODO |
 | ORG_IDENTITY_MGMT | TODO | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | TODO |
@@ -145,6 +147,109 @@ Legend for status column: `TODO` = need method + req/resp body from backend dev.
 **Open question:** does UI screen for this endpoint also need overview stats + full profile list on same view? If yes, either compose on front from 2-3 calls, or backend gives one combined read-model endpoint (`account_mgmt_detail_view`) built for that screen specifically — recommend NOT reusing raw serializer.
 
 **Edge case:** account with zero profiles (broken state, flagged §7 design risk) — `profile` should be `null`, front must handle "no active profile" state (block login or show setup screen, confirm which).
+
+---
+
+<a id="account_mgmt-post"></a>
+### 6.1b ACCOUNT_MGMT — create
+
+`POST /sayeh/manage/account_mgmt/`
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request body**
+```json
+{
+  "uid": "0012345678",
+  "domain": "DIRECTORY_SERVICE_ENVIRONMENT",
+  "is_active": true,
+  "is_mfa": false,
+  "contact": {
+    "mobile": "09914563211",
+    "email": "ali@gmail.com",
+    "country": null,
+    "city": null,
+    "postal_code": null,
+    "address": null,
+    "org_mobile": null,
+    "org_email": null
+  },
+  "identity": {
+    "name": "علی",
+    "surname": "موسوی",
+    "en_name": "mamahd",
+    "en_surname": "ahmadi",
+    "gender": "male",
+    "father_name": "ali",
+    "birth_date": "2026-07-06",
+    "national_code": "0012345678"
+  }
+}
+```
+
+**Success 201** — same shape as §6.1 GET response (includes generated `id`, `identification_code`, `groups: []`, `profile: null`)
+
+**Errors**
+- `422 VALIDATION_ERROR` — bad/missing fields, `details` field-map
+- `409 UID_TAKEN` — uid already exists
+- `409 NATIONAL_CODE_TAKEN` — identity.national_code already exists
+- `401 UNAUTHORIZED`
+
+**Notes**
+- No `profile` in request — account created without profile, `profile: null` in response until profile added via separate profile-create call (not yet spec'd, TODO)
+- `is_active`/`is_mfa` optional, default `true`/`false` if omitted — confirm defaults with backend
+- `mobile_verified`/`email_verified` not in request — set `false` server-side on create, confirmed via OTP flow (`SEND_OTP`/`VALIDATE_OTP`) separately
+
+---
+
+<a id="account_mgmt-put"></a>
+### 6.1c ACCOUNT_MGMT — update
+
+`PUT /sayeh/manage/account_mgmt/{id}/`
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Path params**
+- `id` (int, required) — account id
+
+**Request body** — full replace, same shape as create (§6.1b), minus `uid` (immutable, don't send/accept change)
+```json
+{
+  "domain": "DIRECTORY_SERVICE_ENVIRONMENT",
+  "is_active": true,
+  "is_mfa": false,
+  "contact": {
+    "mobile": "09914563211",
+    "email": "ali@gmail.com",
+    "country": null,
+    "city": null,
+    "postal_code": null,
+    "address": null,
+    "org_mobile": null,
+    "org_email": null
+  },
+  "identity": {
+    "name": "علی",
+    "surname": "موسوی",
+    "en_name": "mamahd",
+    "en_surname": "ahmadi",
+    "gender": "male",
+    "father_name": "ali",
+    "birth_date": "2026-07-06",
+    "national_code": "0012345678"
+  }
+}
+```
+
+**Success 200** — updated resource, same shape as §6.1 GET response
+
+**Errors**
+- `404 ACCOUNT_NOT_FOUND` — bad id
+- `422 VALIDATION_ERROR`
+- `409 NATIONAL_CODE_TAKEN` — if changed to value already used by another account
+- `401 UNAUTHORIZED`
+
+**Open question:** true PUT (full replace, all fields required every call) or really want PATCH semantics (partial update, only send changed fields)? Front forms usually partial-save friendlier — recommend PATCH instead of PUT if backend can support, else front must always send full object even for single-field edit (more error-prone, stale-data overwrite risk on concurrent edits).
 
 ---
 
