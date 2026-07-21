@@ -39,8 +39,8 @@ Legend for status column: `TODO` = need method + req/resp body from backend dev.
 | [PROFILE_GROUPS](#profile-groups-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه پروفایل | DONE — [§6.3](#profile-groups-post) |
 | [PROFILE_ROLES](#profile-roles-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش مستقیم پروفایل | DONE — [§6.4](#profile-roles-post) |
 | [ACCOUNT_MGMT_CONTACT](#account_mgmt-contact-put) | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put) |
-| IDENTITY_MGMT | TODO | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | TODO |
-| ORG_IDENTITY_MGMT | TODO | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | TODO |
+| IDENTITY_MGMT | — | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | DEPRECATED — see §6.1 |
+| ORG_IDENTITY_MGMT | — | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | DEPRECATED — see §6.2 |
 | PROTECTED_RESOURCE_MGMT | TODO | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | TODO |
 | SUBCATALOGFIELD_MGMT | TODO | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | TODO |
 | ACCESS_POLICY_MGMT | TODO | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | TODO |
@@ -508,6 +508,8 @@ Copy this block per endpoint once method + payload known:
 - Several entries missing `id` field (`USER_PERMISSION`, `CONDITION_MGMT`, `CAS_AUDIT_LOG_AGGRS`, `SAYEH_DASHBOARD_OVERVIEW`, `AUTH_SESSIONS`, `AUTH_SESSION_CLOSE`, `LOGIN_LOGOUT_REPORT`, `SEND_OTP`, `VALIDATE_OTP`, `REGISTER_USER`) — need or not?
 - `LOGOUT` path `/sayeh/sso/oidc_credential/` — name says logout but path says credential, confirm correct
 - `REGISTRATION_ACCESS` — empty verbose_name, needs label
+- **`IDENTITY_MGMT` deprecated** — identity is embedded directly in account (§6.1 `identity` object), no separate identity CRUD needed. If backend still exposes standalone identity table/endpoint internally, that's fine, but front never calls it directly — always through account create/update (§6.1b/§6.1c)
+- **`ORG_IDENTITY_MGMT` deprecated** — same concept as profile (§6.2), just named differently in source list ("organization profile" ≈ profile). Consolidated into profile endpoints (§6.2/§6.2b/§6.2c), no separate org-identity spec needed. Confirm with backend this mapping correct before removing route entirely — if org-identity actually has extra fields profile doesn't (e.g. org-specific attrs), may need merge fields into profile shape instead of pure rename
 
 ## 9. Permission model — design note
 
