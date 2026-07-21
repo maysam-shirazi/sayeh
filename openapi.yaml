@@ -1,0 +1,462 @@
+openapi: 3.0.3
+info:
+  title: Sayeh API Contract
+  version: "0.1"
+  description: >
+    Generated from sayeh-api-contract.md. Only endpoints marked DONE in the
+    contract doc are included — TODO rows excluded to avoid false-positive
+    test coverage. Regenerate/extend as more endpoints move to DONE.
+servers:
+  - url: https://<host>
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              nullable: true
+      required: [error]
+
+    Contact:
+      type: object
+      properties:
+        mobile: { type: string }
+        mobile_verified: { type: boolean }
+        email: { type: string }
+        email_verified: { type: boolean }
+        country: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        postal_code: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        org_mobile: { type: string, nullable: true }
+        org_email: { type: string, nullable: true }
+
+    ContactWritable:
+      type: object
+      properties:
+        mobile: { type: string }
+        email: { type: string }
+        country: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        postal_code: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        org_mobile: { type: string, nullable: true }
+        org_email: { type: string, nullable: true }
+
+    ContactPatch:
+      type: object
+      properties:
+        country: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        postal_code: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        org_mobile: { type: string, nullable: true }
+        org_email: { type: string, nullable: true }
+
+    Identity:
+      type: object
+      properties:
+        name: { type: string }
+        surname: { type: string }
+        en_name: { type: string }
+        en_surname: { type: string }
+        gender: { type: string, enum: [male, female] }
+        father_name: { type: string }
+        birth_date: { type: string, format: date }
+        national_code: { type: string }
+
+    GroupRef:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        code: { type: string }
+
+    ProfileSummary:
+      type: object
+      nullable: true
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        is_active: { type: boolean }
+        type: { type: string }
+        roles:
+          type: array
+          items: { type: object }
+
+    Account:
+      type: object
+      properties:
+        id: { type: integer }
+        uid: { type: string }
+        domain: { type: string }
+        is_active: { type: boolean }
+        is_mfa: { type: boolean }
+        is_registered: { type: boolean }
+        identification_code: { type: string }
+        contact: { $ref: '#/components/schemas/Contact' }
+        identity: { $ref: '#/components/schemas/Identity' }
+        groups:
+          type: array
+          items: { $ref: '#/components/schemas/GroupRef' }
+        profile: { $ref: '#/components/schemas/ProfileSummary' }
+      required: [id, uid, domain, is_active, is_mfa, is_registered, contact, identity]
+
+    AccountCreate:
+      type: object
+      properties:
+        uid: { type: string }
+        domain: { type: string }
+        is_active: { type: boolean }
+        is_mfa: { type: boolean }
+        contact: { $ref: '#/components/schemas/ContactWritable' }
+        identity: { $ref: '#/components/schemas/Identity' }
+      required: [uid, domain, contact, identity]
+
+    AccountUpdate:
+      type: object
+      properties:
+        domain: { type: string }
+        is_active: { type: boolean }
+        is_mfa: { type: boolean }
+        contact: { $ref: '#/components/schemas/ContactWritable' }
+        identity: { $ref: '#/components/schemas/Identity' }
+      required: [domain, contact, identity]
+
+    Profile:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        is_active: { type: boolean }
+        is_default: { type: boolean }
+        type: { type: string }
+        identification_code: { type: string }
+        groups:
+          type: array
+          items: { $ref: '#/components/schemas/GroupRef' }
+        roles:
+          type: array
+          items: { type: object }
+        units:
+          type: array
+          items: { type: object }
+
+    ProfileListResponse:
+      type: object
+      properties:
+        profiles:
+          type: array
+          items: { $ref: '#/components/schemas/Profile' }
+      required: [profiles]
+
+    ProfileCreate:
+      type: object
+      properties:
+        title: { type: string }
+        type: { type: integer }
+        identification_code: { type: string }
+        is_active: { type: boolean }
+        is_default: { type: boolean }
+      required: [title, type]
+
+    ProfileUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        type: { type: integer }
+        is_active: { type: boolean }
+        is_default: { type: boolean }
+      required: [title, type]
+
+    GroupAssignRequest:
+      type: object
+      properties:
+        group_id: { type: integer }
+      required: [group_id]
+
+    RoleAssignRequest:
+      type: object
+      properties:
+        role_id: { type: integer }
+      required: [role_id]
+
+    RoleRef:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+
+  parameters:
+    accountId:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    accountIdQuery:
+      name: id
+      in: query
+      required: true
+      schema: { type: integer }
+    profileId:
+      name: profile_id
+      in: path
+      required: true
+      schema: { type: integer }
+    groupId:
+      name: group_id
+      in: path
+      required: true
+      schema: { type: integer }
+    roleId:
+      name: role_id
+      in: path
+      required: true
+      schema: { type: integer }
+
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+paths:
+  /sayeh/manage/account_mgmt/:
+    get:
+      operationId: getAccount
+      summary: "§6.1 ACCOUNT_MGMT — get account by id"
+      parameters:
+        - $ref: '#/components/parameters/accountIdQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createAccount
+      summary: "§6.1b ACCOUNT_MGMT — create account"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AccountCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/account_mgmt/{id}/:
+    put:
+      operationId: updateAccount
+      summary: "§6.1c ACCOUNT_MGMT — update account"
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AccountUpdate' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/account_mgmt/{id}/profiles/:
+    get:
+      operationId: listAccountProfiles
+      summary: "§6.2 ACCOUNT_MGMT_PROFILES — list profiles for account"
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProfileListResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/account_mgmt/{account_id}/profiles/:
+    post:
+      operationId: createAccountProfile
+      summary: "§6.2b ACCOUNT_MGMT_PROFILES — create profile"
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/account_mgmt/{account_id}/profiles/{profile_id}/:
+    put:
+      operationId: updateAccountProfile
+      summary: "§6.2c ACCOUNT_MGMT_PROFILES — update profile"
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - $ref: '#/components/parameters/profileId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileUpdate' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/profile/{profile_id}/groups/:
+    post:
+      operationId: assignProfileGroup
+      summary: "§6.3 PROFILE_GROUPS — assign group to profile"
+      parameters:
+        - $ref: '#/components/parameters/profileId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GroupAssignRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GroupRef' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/profile/{profile_id}/groups/{group_id}/:
+    delete:
+      operationId: unassignProfileGroup
+      summary: "§6.3 PROFILE_GROUPS — unassign group from profile"
+      parameters:
+        - $ref: '#/components/parameters/profileId'
+        - $ref: '#/components/parameters/groupId'
+      responses:
+        '204':
+          description: No Content
+        '404': { $ref: '#/components/responses/NotFound' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/profile/{profile_id}/roles/:
+    post:
+      operationId: assignProfileRole
+      summary: "§6.4 PROFILE_ROLES — assign direct role to profile"
+      parameters:
+        - $ref: '#/components/parameters/profileId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleAssignRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RoleRef' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/profile/{profile_id}/roles/{role_id}/:
+    delete:
+      operationId: unassignProfileRole
+      summary: "§6.4 PROFILE_ROLES — unassign direct role from profile"
+      parameters:
+        - $ref: '#/components/parameters/profileId'
+        - $ref: '#/components/parameters/roleId'
+      responses:
+        '204':
+          description: No Content
+        '404': { $ref: '#/components/responses/NotFound' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /sayeh/manage/account_mgmt/{id}/contact/:
+    put:
+      operationId: updateAccountContact
+      summary: "§6.5 ACCOUNT_MGMT_CONTACT — update non-verified contact fields"
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContactPatch' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Contact' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
