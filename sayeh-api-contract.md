@@ -34,6 +34,11 @@ Legend for status column: `TODO` = need method + req/resp body from backend dev.
 | [ACCOUNT_MGMT](#account_mgmt-post) | POST | `/sayeh/manage/account_mgmt/` | ایجاد کاربر | DONE — [§6.1b](#account_mgmt-post) |
 | [ACCOUNT_MGMT](#account_mgmt-put) | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put) |
 | [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-get) | GET | `/sayeh/manage/account_mgmt/{id}/profiles/` | لیست پروفایل‌های کاربر | DONE — [§6.2](#account_mgmt-profiles-get) |
+| [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-post) | POST | `/sayeh/manage/account_mgmt/{account_id}/profiles/` | ایجاد پروفایل | DONE — [§6.2b](#account_mgmt-profiles-post) |
+| [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-put) | PUT | `/sayeh/manage/account_mgmt/{account_id}/profiles/{profile_id}/` | ویرایش پروفایل | DONE — [§6.2c](#account_mgmt-profiles-put) |
+| [PROFILE_GROUPS](#profile-groups-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه پروفایل | DONE — [§6.3](#profile-groups-post) |
+| [PROFILE_ROLES](#profile-roles-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش مستقیم پروفایل | DONE — [§6.4](#profile-roles-post) |
+| [ACCOUNT_MGMT_CONTACT](#account_mgmt-contact-put) | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put) |
 | IDENTITY_MGMT | TODO | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | TODO |
 | ORG_IDENTITY_MGMT | TODO | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | TODO |
 | PROTECTED_RESOURCE_MGMT | TODO | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | TODO |
@@ -295,6 +300,174 @@ Legend for status column: `TODO` = need method + req/resp body from backend dev.
 - Kept `attributes` as empty array passthrough, shape unknown, revisit when populated
 
 **Open question:** most accounts have single profile — if always 1, consider drop array wrapper and return object directly instead of `{ "profiles": [...] }`. Confirm with backend if multi-profile per account real case.
+
+---
+
+<a id="account_mgmt-profiles-post"></a>
+### 6.2b ACCOUNT_MGMT — profile create
+
+`POST /sayeh/manage/account_mgmt/{account_id}/profiles/`
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request body**
+```json
+{
+  "title": "علی موسوی",
+  "type": 79,
+  "identification_code": "117",
+  "is_active": true,
+  "is_default": false
+}
+```
+
+**Success 201**
+```json
+{
+  "id": 13,
+  "title": "علی موسوی",
+  "is_active": true,
+  "is_default": false,
+  "type": "پرسنل",
+  "identification_code": "117",
+  "groups": [],
+  "roles": [],
+  "units": []
+}
+```
+
+**Errors**
+- `422 VALIDATION_ERROR`
+- `404 ACCOUNT_NOT_FOUND` — bad account_id
+- `401 UNAUTHORIZED`
+
+**Notes**
+- `type` sent as id (numeric) in request, returned as `type` text in response (matches §6.2 GET shape) — front needs a type-picker list, TODO endpoint for that (`SYSTEM_SUBCATALOG`? confirm)
+- No `groups`/`roles` in create body — assign after, via §6.3/§6.4 (same reasoning as account create, avoid ambiguous array-diff-on-save)
+- `is_default: true` on create — should this auto-unset previous default profile server-side? Assume yes, confirm with backend (front shouldn't have to do two calls to swap default)
+
+---
+
+<a id="account_mgmt-profiles-put"></a>
+### 6.2c ACCOUNT_MGMT — profile update
+
+`PUT /sayeh/manage/account_mgmt/{account_id}/profiles/{profile_id}/`
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request body**
+```json
+{
+  "title": "علی موسوی",
+  "type": 79,
+  "is_active": true,
+  "is_default": false
+}
+```
+
+**Success 200** — same shape as §6.2b create response
+
+**Errors**
+- `404 PROFILE_NOT_FOUND`
+- `422 VALIDATION_ERROR`
+- `401 UNAUTHORIZED`
+
+**Notes**
+- `identification_code` excluded from update body — assume immutable after create, confirm with backend
+- Same PUT-vs-PATCH open question as §6.1c applies here too
+
+---
+
+<a id="profile-groups-post"></a>
+### 6.3 Profile — group assign / unassign (new)
+
+`POST /sayeh/manage/profile/{profile_id}/groups/`
+
+**Request body**
+```json
+{ "group_id": 1 }
+```
+
+**Success 201**
+```json
+{ "id": 1, "title": "کارکنان" }
+```
+
+`DELETE /sayeh/manage/profile/{profile_id}/groups/{group_id}/`
+
+**Success 204** — no body
+
+**Errors (both)**
+- `404 PROFILE_NOT_FOUND` / `404 GROUP_NOT_FOUND`
+- `409 ALREADY_ASSIGNED` — POST only, group already linked
+- `401 UNAUTHORIZED`
+
+**Notes**
+- Assigning group here affects aggregated `roles` on profile (per §9, group→role inheritance) — front should refetch profile detail (§6.2) after assign/unassign to get updated aggregate, don't try compute client-side
+- Not in original URL list — invented path, confirm actual route with backend or adjust to match `GROUP_MGMT` pattern if it already has member-management sub-route
+
+---
+
+<a id="profile-roles-post"></a>
+### 6.4 Profile — direct role assign / unassign (new)
+
+`POST /sayeh/manage/profile/{profile_id}/roles/`
+
+**Request body**
+```json
+{ "role_id": 5 }
+```
+
+**Success 201**
+```json
+{ "id": 5, "title": "مدیر گروه" }
+```
+
+`DELETE /sayeh/manage/profile/{profile_id}/roles/{role_id}/`
+
+**Success 204** — no body
+
+**Errors (both)**
+- `404 PROFILE_NOT_FOUND` / `404 ROLE_NOT_FOUND`
+- `409 ALREADY_ASSIGNED` — POST only
+- `401 UNAUTHORIZED`
+
+**Notes**
+- This is **direct** role assign only, distinct from group-inherited roles (§6.3) — matches §9 model (direct + via-group, aggregated)
+- Same refetch-after-write note as §6.3 applies
+
+---
+
+<a id="account_mgmt-contact-put"></a>
+### 6.5 ACCOUNT_MGMT — contact info update
+
+`PUT /sayeh/manage/account_mgmt/{id}/contact/`
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request body — non-verified fields only, immediate apply**
+```json
+{
+  "country": null,
+  "city": null,
+  "postal_code": null,
+  "address": null,
+  "org_mobile": null,
+  "org_email": null
+}
+```
+
+**Success 200** — updated contact object (same shape as §6.1 `contact`)
+
+**Errors**
+- `404 ACCOUNT_NOT_FOUND`
+- `422 VALIDATION_ERROR`
+- `401 UNAUTHORIZED`
+
+**Notes — mobile/email change excluded from this endpoint on purpose**
+- `mobile`/`email` are verified fields (`mobile_verified`/`email_verified` flags) — changing them can't be a plain field-set, must go through OTP flow so verified flag stays trustworthy
+- Flow: `POST SEND_OTP` (`/sayeh/base/send_otp/`, body TODO — likely `{target: "mobile"|"email", value: "..."}`, target endpoint still marked TODO in §3, needs full spec) → `POST VALIDATE_OTP` (`/sayeh/base/validate_otp/`, body TODO, likely `{target, value, code}`) → on success, verified field flips true and value applied server-side
+- Recommend spec SEND_OTP/VALIDATE_OTP next, since contact-info-change and registration both depend on them
 
 ---
 
