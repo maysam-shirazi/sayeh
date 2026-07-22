@@ -36,11 +36,11 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 | [PERMISSION_MGMT](#sec-7-10) | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.10](#sec-7-10) |
 | [ROLE_MGMT](#sec-7-11) | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.11](#sec-7-11) |
 | [ACCOUNT_MGMT](#account_mgmt-get) | GET/POST | `/sayeh/manage/account_mgmt/` | لیست/ایجاد کاربر | DONE — [§6.1](#account_mgmt-get)/[§6.1b](#account_mgmt-post) |
-| [ACCOUNT_MGMT](#account_mgmt-put) | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put) |
-| [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-get) | GET/POST/PUT | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — [§6.2](#account_mgmt-profiles-get)/[§6.2b](#account_mgmt-profiles-post)/[§6.2c](#account_mgmt-profiles-put) |
+| [ACCOUNT_MGMT](#account_mgmt-put) | PATCH | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put), was PUT ([§9.4](#sec-9-4)) |
+| [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-get) | GET/POST/PATCH | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — [§6.2](#account_mgmt-profiles-get)/[§6.2b](#account_mgmt-profiles-post)/[§6.2c](#account_mgmt-profiles-put), was PUT ([§9.4](#sec-9-4)) |
 | [PROFILE_GROUPS](#profile-groups-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | DONE — [§6.3](#profile-groups-post) (confirmed model, see [§9.1](#sec-9-1)) |
 | [PROFILE_ROLES](#profile-roles-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش | DONE — [§6.4](#profile-roles-post) |
-| [ACCOUNT_MGMT_CONTACT](#account_mgmt-contact-put) | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put) |
+| [ACCOUNT_MGMT_CONTACT](#account_mgmt-contact-put) | PATCH | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put), was PUT ([§9.4](#sec-9-4)) |
 | [PROTECTED_RESOURCE_MGMT](#sec-7-12) | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.12](#sec-7-12) |
 | [SUBCATALOGFIELD_MGMT](#sec-7-13) | GET | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.13](#sec-7-13) |
 | [ACCESS_POLICY_MGMT](#sec-7-14) | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), + overlaps role model, see [§9](#sec-9) — [§7.14](#sec-7-14) |
@@ -59,8 +59,8 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 | [SYSTEM_SUBCATALOG](#sec-7-17) | GET | `/sayeh/base/get_system_subcatalog/` | زیرمجموعه کاتالوگ سیستمی | DONE — [§7.17](#sec-7-17) |
 | [CAS_AUDIT_LOG](#sec-7-18) | GET | `/sayeh/base/cas_audit_log/` | لاگ های ورود و خروج سیستم | DONE — [§7.18](#sec-7-18) |
 | [CAS_AUDIT_LOG_AGGRS](#sec-7-19) | GET | `/sayeh/base/cas_audit_log_aggrs/` | تجمیع لاگ های احراز هویت | DONE — [§7.19](#sec-7-19) |
-| [SEND_OTP](#sec-7-20) | POST | `/sayeh/base/send_otp/` | ارسال کد تایید | PARTIAL — [§7.20](#sec-7-20), body unconfirmed |
-| [VALIDATE_OTP](#sec-7-21) | GET | `/sayeh/base/validate_otp/` | اعتبارسنجی کد تایید | PARTIAL — [§7.21](#sec-7-21), query params unconfirmed |
+| [SEND_OTP](#sec-7-20) | POST | `/sayeh/base/send_otp/` | ارسال کد تایید | DONE — [§7.20](#sec-7-20), public endpoint (no auth) |
+| [VALIDATE_OTP](#sec-7-21) | POST | `/sayeh/base/validate_otp/` | اعتبارسنجی کد تایید | DONE — [§7.21](#sec-7-21), changed GET→POST |
 | [INITIAL_CONFIGS](#sec-7-22) | GET | `/sayeh/base/initial_configs/` | اطلاعات اولیه ثبت نام | DONE — [§7.22](#sec-7-22), ⚠ typo in response, see [§9](#sec-9) |
 
 ---
@@ -204,7 +204,7 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 **Notes**
 - No `profile` in request — created without profile, `profile: null` until profile-create called
-- `is_active`/`is_mfa` optional, defaults TBD confirm
+- `is_active`/`is_mfa` optional — defaults resolved: `is_active: true`, `is_mfa: false` if omitted, see [§9.4](#sec-9-4) item 4
 - `mobile_verified`/`email_verified` set `false` server-side, confirmed via OTP flow separately
 
 ---
@@ -212,11 +212,17 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 <a id="account_mgmt-put"></a>
 ### 6.1c ACCOUNT_MGMT — update
 
-`PUT /sayeh/manage/account_mgmt/{id}/`
+`PATCH /sayeh/manage/account_mgmt/{id}/` — changed from PUT, see [§9.4](#sec-9-4) item 1
 
 **Headers:** `Authorization: Bearer <token>`
 
-**Request body** — full replace, same shape as create ([§6.1b](#account_mgmt-post)), minus `uid` (immutable)
+**Request body** — partial, send only fields being changed
+```json
+{
+  "contact": { "mobile": "09914563211" }
+}
+```
+Any top-level or nested field may be included; omitted fields stay unchanged server-side.
 
 **Success 200** — updated resource, same shape as [§6.1](#account_mgmt-get) GET response
 
@@ -225,8 +231,6 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 - `422 VALIDATION_ERROR`
 - `409 NATIONAL_CODE_TAKEN`
 - `401 UNAUTHORIZED`
-
-**Open question:** true PUT (full replace) or PATCH semantics preferred? Recommend PATCH.
 
 ---
 
@@ -247,6 +251,7 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
       "is_active": true,
       "is_default": true,
       "type": "پرسنل",
+      "type_id": 79,
       "identification_code": "117",
       "groups": [
         { "id": 1, "title": "کارکنان" }
@@ -261,9 +266,9 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 - `404 ACCOUNT_NOT_FOUND`
 - `401 UNAUTHORIZED`
 
-**Notes:** Dropped `sayeh_account` (redundant), merged split id/title arrays into objects, `type` returns text not raw id.
+**Notes:** Dropped `sayeh_account` (redundant), merged split id/title arrays into objects. Added `type_id` alongside `type` text, see [§9.4](#sec-9-4) item 3.
 
-**Open question:** most accounts single profile — confirm multi-profile real case, else drop array wrapper.
+**Resolved:** array wrapper `{profiles:[...]}` kept permanently, even for single-profile accounts — see [§9.4](#sec-9-4) item 2.
 
 ---
 
@@ -276,34 +281,34 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 ```json
 {
   "title": "علی موسوی",
-  "type": 79,
+  "type_id": 79,
   "identification_code": "117",
   "is_active": true,
   "is_default": false
 }
 ```
 
-**Success 201** — profile object, same shape as [§6.2](#account_mgmt-profiles-get) list entry plus `roles: []`
+**Success 201** — profile object, same shape as [§6.2](#account_mgmt-profiles-get) list entry plus `roles: []` (includes both `type` text and `type_id`)
 
 **Errors**
 - `422 VALIDATION_ERROR`
 - `404 ACCOUNT_NOT_FOUND`
 - `401 UNAUTHORIZED`
 
-**Notes:** `type` sent as numeric id (matches [§7.13](#sec-7-13) SUBCATALOGFIELD_MGMT catalog `ORG_IDENTITY_TYPE`/similar), returned as text. No `groups`/`roles` in create body, assign after via [§6.3](#profile-groups-post)/[§6.4](#profile-roles-post) (⚠ pending [§9](#sec-9) resolution). `is_default: true` should auto-unset previous default, confirm.
+**Notes:** `type_id` sent as numeric id (matches [§7.13](#sec-7-13) SUBCATALOGFIELD_MGMT catalog `ORG_IDENTITY_TYPE`/similar), response returns text `type` too, see [§9.4](#sec-9-4) item 3. No `groups`/`roles` in create body, assign after via [§6.3](#profile-groups-post)/[§6.4](#profile-roles-post) (confirmed model, [§9.1](#sec-9-1)). `is_default: true` auto-unsets previous default server-side — required behavior, see [§9.4](#sec-9-4) item 5.
 
 ---
 
 <a id="account_mgmt-profiles-put"></a>
 ### 6.2c ACCOUNT_MGMT — profile update
 
-`PUT /sayeh/manage/account_mgmt/{account_id}/profiles/{profile_id}/`
+`PATCH /sayeh/manage/account_mgmt/{account_id}/profiles/{profile_id}/` — changed from PUT, see [§9.4](#sec-9-4) item 1
 
-**Request body**
+**Request body** — partial, send only changed fields
 ```json
 {
   "title": "علی موسوی",
-  "type": 79,
+  "type_id": 79,
   "is_active": true,
   "is_default": false
 }
@@ -316,7 +321,7 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 - `422 VALIDATION_ERROR`
 - `401 UNAUTHORIZED`
 
-**Notes:** `identification_code` excluded, assume immutable. Same PUT-vs-PATCH question as [§6.1c](#account_mgmt-put).
+**Notes:** `identification_code` excluded, assume immutable. `type_id` used here (not `type`) since request needs the numeric id — response still returns both `type` (text) and `type_id`, see [§9.4](#sec-9-4) item 3.
 
 ---
 
@@ -373,19 +378,15 @@ Group membership confirmed profile-only ([§9.1](#sec-9-1)). Real `GROUP_MGMT` P
 <a id="account_mgmt-contact-put"></a>
 ### 6.5 ACCOUNT_MGMT — contact info update
 
-`PUT /sayeh/manage/account_mgmt/{id}/contact/`
+`PATCH /sayeh/manage/account_mgmt/{id}/contact/` — changed from PUT, see [§9.4](#sec-9-4) item 1 (anchor id kept as `-put` for link stability)
 
-**Request body — non-verified fields only**
+**Request body — non-verified fields only, partial**
 ```json
 {
-  "country": null,
-  "city": null,
-  "postal_code": null,
-  "address": null,
-  "org_mobile": null,
-  "org_email": null
+  "city": "تهران"
 }
 ```
+Any subset of the non-verified fields may be sent; omitted fields stay unchanged.
 
 **Success 200** — updated contact object
 
@@ -564,9 +565,9 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 **POST** — create: `{ "code": "NEW_GROUP", "title": "New Group", "description": "test" }`
 **PUT** (`?id={id}`) — update: `{ "code": "GROUP_CODE", "title": "Updated Title", "description": "Updated desc" }`
 **DELETE** (`?id={id}`)
-**PATCH** — membership: `{ "sayeh_accounts": [account_id], "action": "ADD_ACCOUNT" | "REMOVE_ACCOUNT" }`
+**PATCH** — membership (target shape, backend fix pending): `{ "sayeh_profiles": [profile_id], "action": "ADD_PROFILE" | "REMOVE_PROFILE" }` — live endpoint currently takes `sayeh_accounts`/`ADD_ACCOUNT`/`REMOVE_ACCOUNT`, see resolution below
 
-**⚠ Model conflict:** PATCH takes `sayeh_accounts` — accounts join groups directly here, NOT profiles. Contradicts [§6.3](#profile-groups-post)/[§9](#sec-9) assumption that profile is the group-membership unit. See [§9](#sec-9) for required decision.
+**Resolved:** PATCH must take profile ids, not account ids — matches confirmed [§9.1](#sec-9-1) profile-only group membership. Live behavior (`sayeh_accounts`) contradicts this, backend needs to rewire, see [§9.4](#sec-9-4) item 13. Front should not build against the account-based version.
 
 **⚠ Currently returns 500 in prod** — `{"detail": "خطای داخلی سرور رخ داده است."}`. Shape above from other test env, unverified against this deployment.
 
@@ -607,11 +608,11 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 }
 ```
 
-**POST** — `{ "code": "NEW_ROLE", "title": "New Role", "permission": [1, 2] }`
-**PUT** (`?id={id}`) — `{ "title": "Updated Title", "permission": [1], "code": "ROLE_CODE" }`
+**POST** — `{ "code": "NEW_ROLE", "title": "New Role", "permissions": [1, 2] }`
+**PUT** (`?id={id}`) — `{ "title": "Updated Title", "permissions": [1], "code": "ROLE_CODE" }`
 **DELETE** (`?id={id}`)
 
-**⚠ Naming inconsistency:** GET response key is `permissions` (plural), POST/PUT body key is `permission` (singular) — pick one, recommend `permissions` consistently.
+**Resolved:** use `permissions` (plural) consistently — GET response and POST/PUT body both, was `permission` singular on write before, see [§9.4](#sec-9-4) item 8.
 
 ---
 
@@ -716,13 +717,13 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 
 **Query params:** `scope` (required) — `ALL` or `USER`
 
-**Success 200**
+**Success 200 — target shape (backend fix pending, see below)**
 ```json
 {
   "data": [
     {
       "id": 569, "sayeh_account_uid": "my_admin", "status": true,
-      "data": "{'page_size': ['500']}", "message": "دریافت گروه",
+      "data": { "page_size": ["500"] }, "message": "دریافت گروه",
       "action_type": "مدیریت گروه ها", "ip": "192.168.240.16",
       "user_agent": "Mozilla/5.0 ...", "object_id": null,
       "date_created": "2026-07-22T08:04:44.936113Z", "admin": null
@@ -733,7 +734,7 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 ```
 **Errors:** `400` — `{"status": "FAIL", "message": "invalid scope"}`
 
-**⚠ Bug:** `data` field is a Python-dict `repr()` string (single quotes: `"{'page_size': ['500']}"`), not valid JSON. Front must NOT `JSON.parse()` this field blind — will throw. Flag to backend: serialize with `json.dumps()` not `str(dict)`.
+**Resolved:** `data` must be a real JSON object, not a Python `repr()` string — live response currently returns `"data": "{'page_size': ['500']}"` (single-quoted, invalid JSON syntax embedded in a JSON string). Backend needs to serialize with `json.dumps()`/native object instead of `str(dict)`. Front will treat `data` as an object per this target shape, see [§9.4](#sec-9-4) item 10.
 
 ---
 
@@ -774,22 +775,22 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 
 `GET /sayeh/base/cas_audit_log_aggrs/?field={field_name}`
 
-**Success 200**
+**Success 200 — target shape (backend fix pending)**
 ```json
-{ "STATUS": "SUCCESS", "data": [] }
+{ "status": "SUCCESS", "data": [] }
 ```
-**Errors:** `400` — `{"STATUS": "FAIL", "message": "field must send"}`
+**Errors:** `400` — `{"status": "FAIL", "message": "field must send"}`
 
-**⚠ Inconsistency:** key is `STATUS` (uppercase) here vs `status` (lowercase) on nearly every other endpoint — pick one casing convention.
+**Resolved:** use lowercase `status` — live response currently returns uppercase `STATUS`, inconsistent with nearly every other endpoint. Backend to fix casing, see [§9.4](#sec-9-4) item 9.
 
 ---
 
 <a id="sec-7-20"></a>
-### 7.20 SEND_OTP — body unconfirmed
+### 7.20 SEND_OTP — decided, see [§9.4](#sec-9-4) item 6
 
-`POST /sayeh/base/send_otp/`
+`POST /sayeh/base/send_otp/` — **must be public, no `Authorization` header required**
 
-**Request body (assumed, not confirmed)**
+**Request body**
 ```json
 { "target": "mobile", "value": "09912345678" }
 ```
@@ -797,20 +798,24 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 ```json
 { "status": "SUCCESS", "data": {} }
 ```
-**Errors:** `401` — seen during test, unclear if this endpoint is meant to be public (no-auth) or test used wrong token format. Needs clarify — an OTP-send endpoint gated behind a bearer token is unusual (chicken-egg for registration flow where user has no token yet).
+**Resolved:** the `401` seen during earlier testing was a bug, not intended behavior — this endpoint is called before registration/login exists (no token available yet), so requiring a bearer token is a contradiction, not a design choice. Backend should remove any auth requirement here.
 
 ---
 
 <a id="sec-7-21"></a>
-### 7.21 VALIDATE_OTP — query params unconfirmed
+### 7.21 VALIDATE_OTP — decided, see [§9.4](#sec-9-4) item 7
 
-`GET /sayeh/base/validate_otp/`
+`POST /sayeh/base/validate_otp/` — **changed from GET to POST**, params move to request body
 
+**Request body**
+```json
+{ "target": "mobile", "value": "09912345678", "code": "123456" }
+```
 **Success 200**
 ```json
 { "status": "SUCCESS", "data": {} }
 ```
-**Notes:** GET method (unusual for a validate-with-code action, normally POST since code is sensitive-ish and GET params can end up in logs/browser history). Query params likely `code` + `target`, unconfirmed — flag to backend: consider POST instead if not already fixed elsewhere.
+**Resolved:** GET-with-code-in-query was flagged risky (sensitive code ends up in access logs / browser history) — switched to POST with code in body. Same public-endpoint reasoning as [§7.20](#sec-7-20) likely applies here too (called pre-auth in registration flow), confirm with backend.
 
 ---
 
@@ -819,10 +824,10 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 
 `GET /sayeh/base/initial_configs/` — no auth required (public)
 
-**Success 200**
+**Success 200 — target shape (backend fix pending)**
 ```json
 {
-  "status": "susccess",
+  "status": "success",
   "id_type": [
     { "id": 2, "code": "PERSONNEL_NO", "title": "کد پرسنلی", "description": "nationalCode" }
   ],
@@ -842,7 +847,7 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 }
 ```
 
-**⚠ Bug:** `"status": "susccess"` — typo, should be `"success"`. Front should NOT string-match on this typo (fragile); check for absence of `"FAIL"`/error field instead, or flag backend to fix the typo properly rather than build around it.
+**Resolved:** fix `"susccess"` typo → `"success"`. Live response still has the typo — front should not string-match on it either way (check absence of `"FAIL"`/error instead), but backend should fix the source typo too, see [§9.4](#sec-9-4) item 11.
 
 ---
 
@@ -851,18 +856,18 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 
 `GET /sayeh/admin/sayeh_dashboard_overview/`
 
-**Success 200**
+**Success 200 — target shape (backend fix pending)**
 ```json
 {
   "data": {
     "total_users": 13, "active_users": 13, "total_roles": 1, "total_groups": 1,
     "protected_systems": 1, "access_policies": 2, "webservice_calls_today": 125,
-    "units": 5, "annoncements": 2, "failed_webservice_calls_today": 0, "failed_logins_today": 0
+    "units": 5, "announcements": 2, "failed_webservice_calls_today": 0, "failed_logins_today": 0
   }
 }
 ```
 
-**⚠ Typo:** `annoncements` should be `announcements` — flag, don't silently rename in front code (breaks if backend fixes it later without front knowing), track as known field-name typo instead.
+**Resolved:** fix `annoncements` → `announcements`. Live field name currently has the typo, see [§9.4](#sec-9-4) item 12.
 
 ---
 
@@ -939,13 +944,36 @@ Permission model ([§12](#sec-12)) confirmed as originally stated — no further
 
 <a id="sec-9-3"></a>
 ### 9.3 Naming/typo cleanup list (low priority, batch with backend later)
-- `permissions` (GET) vs `permission` (POST/PUT) on ROLE_MGMT — [§7.11](#sec-7-11)
-- `STATUS` vs `status` casing — [§7.19](#sec-7-19) vs everywhere else
-- `"susccess"` typo — [§7.22](#sec-7-22)
-- `annoncements` typo — [§7.23](#sec-7-23)
-- `account_action_mgmt.data` field serialized as Python repr, not JSON — [§7.16](#sec-7-16)
+- `permissions` (GET) vs `permission` (POST/PUT) on ROLE_MGMT — [§7.11](#sec-7-11) — **RESOLVED, see §9.4**
+- `STATUS` vs `status` casing — [§7.19](#sec-7-19) vs everywhere else — **RESOLVED, see §9.4**
+- `"susccess"` typo — [§7.22](#sec-7-22) — **RESOLVED, see §9.4**
+- `annoncements` typo — [§7.23](#sec-7-23) — **RESOLVED, see §9.4**
+- `account_action_mgmt.data` field serialized as Python repr, not JSON — [§7.16](#sec-7-16) — **RESOLVED, see §9.4**
 
----
+<a id="sec-9-4"></a>
+### 9.4 Frontend-decided resolutions — ready for backend implementation
+
+Everything below was an open question the frontend had discretion to call. Decided now so backend has one target to build, not a range of options. Items still needing backend/architect input (not frontend's call) are excluded — see [§9.2](#sec-9-2), still open.
+
+| # | Item | Decision | Affects |
+|---|---|---|---|
+| 1 | PUT vs PATCH on account/profile/contact update | **PATCH**, partial-update semantics — only send changed fields, avoid full-object resend and stale-overwrite risk on concurrent edits | [§6.1c](#account_mgmt-put), [§6.2c](#account_mgmt-profiles-put), [§6.5](#account_mgmt-contact-put) |
+| 2 | Profile list wrapper `{profiles:[...]}` vs bare object | **Keep array wrapper**, always — even if today every account has exactly one profile, don't special-case the shape; front parsing logic stays uniform, and multi-profile-per-account is explicitly part of the confirmed design ([§12](#sec-12)) so it will happen | [§6.2](#account_mgmt-profiles-get) |
+| 3 | Profile `type` — text-only or text+id | **Both** — return `type` (display text) AND `type_id` (numeric) on every profile response (GET, create response, update response). Front edit-forms need the id to pre-select a dropdown without a second lookup call | [§6.2](#account_mgmt-profiles-get), [§6.2b](#account_mgmt-profiles-post), [§6.2c](#account_mgmt-profiles-put) |
+| 4 | `is_active`/`is_mfa` defaults on account create | **`is_active: true`, `is_mfa: false`** if omitted from request body — document as explicit contract default, not implementation-defined | [§6.1b](#account_mgmt-post) |
+| 5 | `is_default: true` on profile create/update | **Server auto-unsets previous default profile** in same transaction — front never has to make two calls to swap active profile | [§6.2b](#account_mgmt-profiles-post), [§6.2c](#account_mgmt-profiles-put) |
+| 6 | SEND_OTP auth requirement | **Must be public, no bearer token required** — this is called before registration/login exists, a token requirement is a chicken-egg bug, not a design choice | [§7.20](#sec-7-20) |
+| 7 | VALIDATE_OTP method | **Change GET → POST**, code + target go in request body not query string — avoids sensitive code landing in server access logs / browser history | [§7.21](#sec-7-21) |
+| 8 | `permissions` vs `permission` naming | **`permissions`** (plural) everywhere — GET response and POST/PUT request body both use this key | [§7.11](#sec-7-11) |
+| 9 | `STATUS` vs `status` casing | **`status`**, lowercase, everywhere — matches the majority of endpoints already | [§7.19](#sec-7-19) |
+| 10 | `account_action_mgmt.data` field type | **Real JSON object**, not a stringified Python `repr()` — front will `JSON.parse()` or expect a native object, either way it must be valid JSON | [§7.16](#sec-7-16) |
+| 11 | `"susccess"` typo | **Fix to `"success"`** — front should not need to special-case a misspelling | [§7.22](#sec-7-22) |
+| 12 | `annoncements` typo | **Fix to `announcements`** | [§7.23](#sec-7-23) |
+| 13 | GROUP_MGMT PATCH payload | **Accept `sayeh_profiles`** (or similarly renamed field), not `sayeh_accounts` — matches confirmed [§9.1](#sec-9-1) profile-only group membership | [§7.9](#sec-7-9) |
+
+**Not decided here, still needs backend/architect input:** [§9.2](#sec-9-2) (role/permission vs access-policy/condition interaction) — this is an architecture question, not a frontend preference, needs a real discussion before front builds any policy-editing UI.
+
+
 
 <a id="sec-10"></a>
 ## 10. Changelog (this verification pass)
@@ -964,13 +992,18 @@ Permission model ([§12](#sec-12)) confirmed as originally stated — no further
 <a id="sec-11"></a>
 ## 11. Known Issues (backend bugs, confirmed via real testing)
 
+Still live in the tested deployment as of this pass — target/desired shape decided in [§9.4](#sec-9-4), backend needs to implement fixes:
+
 - 6 manage endpoints return prod 500: `group_mgmt`, `role_mgmt`, `permission_mgmt`, `protected_resource_mgmt`, `access_policy_mgmt`, `subcatalogfield_mgmt` — `{"detail": "خطای داخلی سرور رخ داده است."}`. Confirmed shapes above come from other test env, need re-verify against this deployment once 500s fixed
-- `INITIAL_CONFIGS` status typo `"susccess"`
-- `account_action_mgmt` `data` field is Python-repr string, not JSON
-- `SAYEH_DASHBOARD_OVERVIEW` field typo `annoncements`
-- `ROLE_MGMT` key naming inconsistency (`permissions` vs `permission`)
-- `CAS_AUDIT_LOG_AGGRS` key casing inconsistency (`STATUS` vs `status`)
-- `LOGOUT` path/name mismatch — resolved by rename in this pass, was never a logout, always OIDC config fetch
+- `INITIAL_CONFIGS` status typo `"susccess"` — fix target: `"success"` ([§9.4](#sec-9-4)#11)
+- `account_action_mgmt` `data` field is Python-repr string, not JSON — fix target: real JSON object ([§9.4](#sec-9-4)#10)
+- `SAYEH_DASHBOARD_OVERVIEW` field typo `annoncements` — fix target: `announcements` ([§9.4](#sec-9-4)#12)
+- `ROLE_MGMT` key naming inconsistency (`permissions` vs `permission`) — fix target: `permissions` everywhere ([§9.4](#sec-9-4)#8)
+- `CAS_AUDIT_LOG_AGGRS` key casing inconsistency (`STATUS` vs `status`) — fix target: lowercase `status` ([§9.4](#sec-9-4)#9)
+- `GROUP_MGMT` PATCH takes `sayeh_accounts`, contradicts confirmed profile-only group model — fix target: `sayeh_profiles` ([§9.4](#sec-9-4)#13)
+- `SEND_OTP` returned `401` in testing — fix target: public, no auth required ([§9.4](#sec-9-4)#6)
+- `VALIDATE_OTP` uses GET with params in query — fix target: POST with body ([§9.4](#sec-9-4)#7)
+- `LOGOUT` path/name mismatch — resolved by rename in this pass (doc-only fix), was never a logout, always OIDC config fetch, no backend change needed here
 
 ---
 
