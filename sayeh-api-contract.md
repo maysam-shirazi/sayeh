@@ -16,14 +16,14 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| USER_PERMISSION | GET | `/sayeh/auth/user_permission/` | دسترسی کاربر | DONE — [§7.1](#sec-7-1) |
-| AUTH_SESSIONS | GET | `/sayeh/auth/sessions/` | نشست های فعال من | DONE — [§7.2](#sec-7-2) |
-| AUTH_SESSION_CLOSE | DELETE | `/sayeh/auth/sessions/close/` | خاتمه نشست من | DONE — [§7.3](#sec-7-3) |
-| LOGIN_LOGOUT_REPORT | GET | `/sayeh/auth/login_logout_report/` | گزارش ورود و خروج من | DONE — [§7.4](#sec-7-4) |
-| CHANGE_PASSWORD | POST | `/sayeh/auth/change_password/` | تغییر گذرواژه | DONE — [§7.5](#sec-7-5) |
-| PROFILE | GET | `/sayeh/auth/profile/` | پروفایل | DONE — [§7.6](#sec-7-6) |
-| REGISTRATION_ACCESS | POST | `/sayeh/auth/registration_access/` | (no name) | DONE — [§7.7](#sec-7-7) |
-| REGISTER_USER | POST | `/sayeh/auth/register_user/` | ثبت نام کاربر | PARTIAL — [§7.8](#sec-7-8), body TBD (depends on OTP flow [§7.13](#sec-7-13)/[§7.14](#sec-7-14)) |
+| [USER_PERMISSION](#sec-7-1) | GET | `/sayeh/auth/user_permission/` | دسترسی کاربر | DONE — [§7.1](#sec-7-1) |
+| [AUTH_SESSIONS](#sec-7-2) | GET | `/sayeh/auth/sessions/` | نشست های فعال من | DONE — [§7.2](#sec-7-2) |
+| [AUTH_SESSION_CLOSE](#sec-7-3) | DELETE | `/sayeh/auth/sessions/close/` | خاتمه نشست من | DONE — [§7.3](#sec-7-3) |
+| [LOGIN_LOGOUT_REPORT](#sec-7-4) | GET | `/sayeh/auth/login_logout_report/` | گزارش ورود و خروج من | DONE — [§7.4](#sec-7-4) |
+| [CHANGE_PASSWORD](#sec-7-5) | POST | `/sayeh/auth/change_password/` | تغییر گذرواژه | DONE — [§7.5](#sec-7-5) |
+| [PROFILE](#sec-7-6) | GET | `/sayeh/auth/profile/` | پروفایل | DONE — [§7.6](#sec-7-6) |
+| [REGISTRATION_ACCESS](#sec-7-7) | POST | `/sayeh/auth/registration_access/` | (no name) | DONE — [§7.7](#sec-7-7) |
+| [REGISTER_USER](#sec-7-8) | POST | `/sayeh/auth/register_user/` | ثبت نام کاربر | PARTIAL — [§7.8](#sec-7-8), body TBD (depends on OTP flow [§7.13](#sec-7-13)/[§7.14](#sec-7-14)) |
 
 ---
 
@@ -32,22 +32,22 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| GROUP_MGMT | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), PATCH needs backend fix ([§9.1](#sec-9-1): should take profile ids not account ids) — [§7.9](#sec-7-9) |
-| PERMISSION_MGMT | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.10](#sec-7-10) |
-| ROLE_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.11](#sec-7-11) |
-| ACCOUNT_MGMT | GET/POST | `/sayeh/manage/account_mgmt/` | لیست/ایجاد کاربر | DONE — [§6.1](#account_mgmt-get)/[§6.1b](#account_mgmt-post) |
-| ACCOUNT_MGMT | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put) |
-| ACCOUNT_MGMT_PROFILES | GET/POST/PUT | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — [§6.2](#account_mgmt-profiles-get)/[§6.2b](#account_mgmt-profiles-post)/[§6.2c](#account_mgmt-profiles-put) |
-| PROFILE_GROUPS | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | DONE — [§6.3](#profile-groups-post) (confirmed model, see [§9.1](#sec-9-1)) |
-| PROFILE_ROLES | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش | DONE — [§6.4](#profile-roles-post) |
-| ACCOUNT_MGMT_CONTACT | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put) |
-| PROTECTED_RESOURCE_MGMT | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.12](#sec-7-12) |
-| SUBCATALOGFIELD_MGMT | GET | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.13](#sec-7-13) |
-| ACCESS_POLICY_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), + overlaps role model, see [§9](#sec-9) — [§7.14](#sec-7-14) |
-| CONDITION_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/condition_mgmt/` | شرایط سیاست دسترسی | DONE — [§7.15](#sec-7-15) |
-| ACCOUNT_ACTION_MGMT | GET | `/sayeh/manage/account_action_mgmt/` | لاگ های فراخوانی وب سرویس | DONE — [§7.16](#sec-7-16), ⚠ `data` field non-JSON, see [§9](#sec-9) |
-| IDENTITY_MGMT | — | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | DEPRECATED — see [§6.1](#account_mgmt-get) |
-| ORG_IDENTITY_MGMT | — | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | DEPRECATED — see [§6.2](#account_mgmt-profiles-get) |
+| [GROUP_MGMT](#sec-7-9) | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), PATCH needs backend fix ([§9.1](#sec-9-1): should take profile ids not account ids) — [§7.9](#sec-7-9) |
+| [PERMISSION_MGMT](#sec-7-10) | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.10](#sec-7-10) |
+| [ROLE_MGMT](#sec-7-11) | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.11](#sec-7-11) |
+| [ACCOUNT_MGMT](#account_mgmt-get) | GET/POST | `/sayeh/manage/account_mgmt/` | لیست/ایجاد کاربر | DONE — [§6.1](#account_mgmt-get)/[§6.1b](#account_mgmt-post) |
+| [ACCOUNT_MGMT](#account_mgmt-put) | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put) |
+| [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-get) | GET/POST/PUT | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — [§6.2](#account_mgmt-profiles-get)/[§6.2b](#account_mgmt-profiles-post)/[§6.2c](#account_mgmt-profiles-put) |
+| [PROFILE_GROUPS](#profile-groups-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | DONE — [§6.3](#profile-groups-post) (confirmed model, see [§9.1](#sec-9-1)) |
+| [PROFILE_ROLES](#profile-roles-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش | DONE — [§6.4](#profile-roles-post) |
+| [ACCOUNT_MGMT_CONTACT](#account_mgmt-contact-put) | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put) |
+| [PROTECTED_RESOURCE_MGMT](#sec-7-12) | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.12](#sec-7-12) |
+| [SUBCATALOGFIELD_MGMT](#sec-7-13) | GET | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.13](#sec-7-13) |
+| [ACCESS_POLICY_MGMT](#sec-7-14) | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), + overlaps role model, see [§9](#sec-9) — [§7.14](#sec-7-14) |
+| [CONDITION_MGMT](#sec-7-15) | GET/POST/PUT/DELETE | `/sayeh/manage/condition_mgmt/` | شرایط سیاست دسترسی | DONE — [§7.15](#sec-7-15) |
+| [ACCOUNT_ACTION_MGMT](#sec-7-16) | GET | `/sayeh/manage/account_action_mgmt/` | لاگ های فراخوانی وب سرویس | DONE — [§7.16](#sec-7-16), ⚠ `data` field non-JSON, see [§9](#sec-9) |
+| [IDENTITY_MGMT](#account_mgmt-get) | — | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | DEPRECATED — see [§6.1](#account_mgmt-get) |
+| [ORG_IDENTITY_MGMT](#account_mgmt-profiles-get) | — | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | DEPRECATED — see [§6.2](#account_mgmt-profiles-get) |
 
 ---
 
@@ -56,12 +56,12 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| SYSTEM_SUBCATALOG | GET | `/sayeh/base/get_system_subcatalog/` | زیرمجموعه کاتالوگ سیستمی | DONE — [§7.17](#sec-7-17) |
-| CAS_AUDIT_LOG | GET | `/sayeh/base/cas_audit_log/` | لاگ های ورود و خروج سیستم | DONE — [§7.18](#sec-7-18) |
-| CAS_AUDIT_LOG_AGGRS | GET | `/sayeh/base/cas_audit_log_aggrs/` | تجمیع لاگ های احراز هویت | DONE — [§7.19](#sec-7-19) |
-| SEND_OTP | POST | `/sayeh/base/send_otp/` | ارسال کد تایید | PARTIAL — [§7.20](#sec-7-20), body unconfirmed |
-| VALIDATE_OTP | GET | `/sayeh/base/validate_otp/` | اعتبارسنجی کد تایید | PARTIAL — [§7.21](#sec-7-21), query params unconfirmed |
-| INITIAL_CONFIGS | GET | `/sayeh/base/initial_configs/` | اطلاعات اولیه ثبت نام | DONE — [§7.22](#sec-7-22), ⚠ typo in response, see [§9](#sec-9) |
+| [SYSTEM_SUBCATALOG](#sec-7-17) | GET | `/sayeh/base/get_system_subcatalog/` | زیرمجموعه کاتالوگ سیستمی | DONE — [§7.17](#sec-7-17) |
+| [CAS_AUDIT_LOG](#sec-7-18) | GET | `/sayeh/base/cas_audit_log/` | لاگ های ورود و خروج سیستم | DONE — [§7.18](#sec-7-18) |
+| [CAS_AUDIT_LOG_AGGRS](#sec-7-19) | GET | `/sayeh/base/cas_audit_log_aggrs/` | تجمیع لاگ های احراز هویت | DONE — [§7.19](#sec-7-19) |
+| [SEND_OTP](#sec-7-20) | POST | `/sayeh/base/send_otp/` | ارسال کد تایید | PARTIAL — [§7.20](#sec-7-20), body unconfirmed |
+| [VALIDATE_OTP](#sec-7-21) | GET | `/sayeh/base/validate_otp/` | اعتبارسنجی کد تایید | PARTIAL — [§7.21](#sec-7-21), query params unconfirmed |
+| [INITIAL_CONFIGS](#sec-7-22) | GET | `/sayeh/base/initial_configs/` | اطلاعات اولیه ثبت نام | DONE — [§7.22](#sec-7-22), ⚠ typo in response, see [§9](#sec-9) |
 
 ---
 
@@ -70,7 +70,7 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| SAYEH_DASHBOARD_OVERVIEW | GET | `/sayeh/admin/sayeh_dashboard_overview/` | آمار کلی داشبورد تنظیمات | DONE — [§7.23](#sec-7-23) |
+| [SAYEH_DASHBOARD_OVERVIEW](#sec-7-23) | GET | `/sayeh/admin/sayeh_dashboard_overview/` | آمار کلی داشبورد تنظیمات | DONE — [§7.23](#sec-7-23) |
 
 ---
 
@@ -79,8 +79,8 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| OIDC_CREDENTIAL | GET | `/sayeh/sso/oidc_credential/` | تنظیمات OIDC (نام قبلی: LOGOUT — نادرست، [§9](#sec-9)) | DONE — [§7.24](#sec-7-24) |
-| USER_CREDENTIAL_MANAGEMENT | POST | `/sayeh/sso/user_credential_management/` | احراز هویت توکن لاگین متمرکز | PARTIAL — [§7.25](#sec-7-25), body TBD |
+| [OIDC_CREDENTIAL](#sec-7-24) | GET | `/sayeh/sso/oidc_credential/` | تنظیمات OIDC (نام قبلی: LOGOUT — نادرست، [§9](#sec-9)) | DONE — [§7.24](#sec-7-24) |
+| [USER_CREDENTIAL_MANAGEMENT](#sec-7-25) | POST | `/sayeh/sso/user_credential_management/` | احراز هویت توکن لاگین متمرکز | PARTIAL — [§7.25](#sec-7-25), body TBD |
 
 ---
 
