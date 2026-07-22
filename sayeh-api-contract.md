@@ -46,8 +46,6 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 | [ACCESS_POLICY_MGMT](#sec-7-14) | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | DONE — [§7.14](#sec-7-14), architecture question re role-model overlap ([§9.2](#sec-9-2)) |
 | [CONDITION_MGMT](#sec-7-15) | GET/POST/PUT/DELETE | `/sayeh/manage/condition_mgmt/` | شرایط سیاست دسترسی | DONE — [§7.15](#sec-7-15) |
 | [ACCOUNT_ACTION_MGMT](#sec-7-16) | GET | `/sayeh/manage/account_action_mgmt/` | لاگ های فراخوانی وب سرویس | DONE — [§7.16](#sec-7-16), ⚠ `data` field non-JSON, see [§9](#sec-9) |
-| [IDENTITY_MGMT](#account_mgmt-get) | — | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | DEPRECATED — see [§6.1](#account_mgmt-get) |
-| [ORG_IDENTITY_MGMT](#account_mgmt-profiles-get) | — | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | DEPRECATED — see [§6.2](#account_mgmt-profiles-get) |
 
 ---
 
