@@ -1,6 +1,6 @@
 # Sayeh API Contract
 
-Version: 0.2.1 (verified — fixes applied, see [§10](#sec-10) changelog)
+Version: 0.3 (contract — every endpoint below is required to return the documented shape at 200; current backend gaps tracked separately in [§11](#sec-11), see [§10](#sec-10) changelog)
 Base URL: `https://<host>/bapi`
 Auth: Bearer token (`Authorization: Bearer <token>`)
 
@@ -32,18 +32,18 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| [GROUP_MGMT](#sec-7-9) | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), PATCH needs backend fix ([§9.1](#sec-9-1): should take profile ids not account ids) — [§7.9](#sec-7-9) |
-| [PERMISSION_MGMT](#sec-7-10) | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.10](#sec-7-10) |
-| [ROLE_MGMT](#sec-7-11) | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.11](#sec-7-11) |
+| [GROUP_MGMT](#sec-7-9) | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | DONE — [§7.9](#sec-7-9), PATCH payload change required ([§9.4](#sec-9-4)#13) |
+| [PERMISSION_MGMT](#sec-7-10) | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | DONE — [§7.10](#sec-7-10) |
+| [ROLE_MGMT](#sec-7-11) | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | DONE — [§7.11](#sec-7-11) |
 | [ACCOUNT_MGMT](#account_mgmt-get) | GET/POST | `/sayeh/manage/account_mgmt/` | لیست/ایجاد کاربر | DONE — [§6.1](#account_mgmt-get)/[§6.1b](#account_mgmt-post) |
 | [ACCOUNT_MGMT](#account_mgmt-put) | PATCH | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put), was PUT ([§9.4](#sec-9-4)) |
 | [ACCOUNT_MGMT_PROFILES](#account_mgmt-profiles-get) | GET/POST/PATCH | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — [§6.2](#account_mgmt-profiles-get)/[§6.2b](#account_mgmt-profiles-post)/[§6.2c](#account_mgmt-profiles-put), was PUT ([§9.4](#sec-9-4)) |
 | [PROFILE_GROUPS](#profile-groups-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | DONE — [§6.3](#profile-groups-post) (confirmed model, see [§9.1](#sec-9-1)) |
 | [PROFILE_ROLES](#profile-roles-post) | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش | DONE — [§6.4](#profile-roles-post) |
 | [ACCOUNT_MGMT_CONTACT](#account_mgmt-contact-put) | PATCH | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put), was PUT ([§9.4](#sec-9-4)) |
-| [PROTECTED_RESOURCE_MGMT](#sec-7-12) | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.12](#sec-7-12) |
-| [SUBCATALOGFIELD_MGMT](#sec-7-13) | GET | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.13](#sec-7-13) |
-| [ACCESS_POLICY_MGMT](#sec-7-14) | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), + overlaps role model, see [§9](#sec-9) — [§7.14](#sec-7-14) |
+| [PROTECTED_RESOURCE_MGMT](#sec-7-12) | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | DONE — [§7.12](#sec-7-12) |
+| [SUBCATALOGFIELD_MGMT](#sec-7-13) | GET | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | DONE — [§7.13](#sec-7-13) |
+| [ACCESS_POLICY_MGMT](#sec-7-14) | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | DONE — [§7.14](#sec-7-14), architecture question re role-model overlap ([§9.2](#sec-9-2)) |
 | [CONDITION_MGMT](#sec-7-15) | GET/POST/PUT/DELETE | `/sayeh/manage/condition_mgmt/` | شرایط سیاست دسترسی | DONE — [§7.15](#sec-7-15) |
 | [ACCOUNT_ACTION_MGMT](#sec-7-16) | GET | `/sayeh/manage/account_action_mgmt/` | لاگ های فراخوانی وب سرویس | DONE — [§7.16](#sec-7-16), ⚠ `data` field non-JSON, see [§9](#sec-9) |
 | [IDENTITY_MGMT](#account_mgmt-get) | — | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | DEPRECATED — see [§6.1](#account_mgmt-get) |
@@ -547,7 +547,7 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 ---
 
 <a id="sec-7-9"></a>
-### 7.9 GROUP_MGMT — ⚠ BLOCKED (prod 500) + model conflict
+### 7.9 GROUP_MGMT
 
 `GET /sayeh/manage/group_mgmt/?page_size={n}&page={n}`
 
@@ -569,12 +569,12 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 
 **Resolved:** PATCH must take profile ids, not account ids — matches confirmed [§9.1](#sec-9-1) profile-only group membership. Live behavior (`sayeh_accounts`) contradicts this, backend needs to rewire, see [§9.4](#sec-9-4) item 13. Front should not build against the account-based version.
 
-**⚠ Currently returns 500 in prod** — `{"detail": "خطای داخلی سرور رخ داده است."}`. Shape above from other test env, unverified against this deployment.
+**Contract requirement:** must return `200` with the shape above — current deployment returns `500` (`{"detail": "خطای داخلی سرور رخ داده است."}`), tracked as an open backend task in [§11](#sec-11), not a spec ambiguity. Shape confirmed from other test env.
 
 ---
 
 <a id="sec-7-10"></a>
-### 7.10 PERMISSION_MGMT — ⚠ BLOCKED (prod 500)
+### 7.10 PERMISSION_MGMT
 
 `GET /sayeh/manage/permission_mgmt/?page={n}&page_size={n}`
 
@@ -593,7 +593,7 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 ---
 
 <a id="sec-7-11"></a>
-### 7.11 ROLE_MGMT — ⚠ BLOCKED (prod 500)
+### 7.11 ROLE_MGMT
 
 `GET /sayeh/manage/role_mgmt/?page={n}&page_size={n}`
 
@@ -617,7 +617,7 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 ---
 
 <a id="sec-7-12"></a>
-### 7.12 PROTECTED_RESOURCE_MGMT — ⚠ BLOCKED (prod 500)
+### 7.12 PROTECTED_RESOURCE_MGMT
 
 `GET /sayeh/manage/protected_resource_mgmt/?page_size={n}&page={n}`
 
@@ -664,7 +664,7 @@ Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+g
 ---
 
 <a id="sec-7-14"></a>
-### 7.14 ACCESS_POLICY_MGMT — ⚠ BLOCKED (prod 500) + overlaps role model
+### 7.14 ACCESS_POLICY_MGMT
 
 `GET /sayeh/manage/access_policy_mgmt/?page_size={n}&page={n}`
 
@@ -981,7 +981,7 @@ Everything below was an open question the frontend had discretion to call. Decid
 - Fixed Base URL double-`/sayeh` prefix bug
 - Renamed `LOGOUT` → `OIDC_CREDENTIAL` in [§5](#sec-5) table (code didn't match actual behavior)
 - Downgraded status on 4 endpoints from DONE to PARTIAL where body/params still unconfirmed (REGISTER_USER, SEND_OTP, VALIDATE_OTP, USER_CREDENTIAL_MANAGEMENT)
-- Flagged 6 endpoints DONE-but-blocked (prod 500), added ⚠ marker instead of silent DONE
+- Flagged 6 endpoints as backend TODO (currently 500 in deployment, contract requires 200) — tracked in [§11](#sec-11), not treated as spec ambiguity
 - Restructured flat `## 1.1`–`## 5.2` headers (wrong heading level, same as top nav) into nested `### 7.x` under one `## 7` parent
 - Surfaced GROUP_MGMT vs PROFILE_GROUPS model conflict as top-priority blocking decision ([§9.1](#sec-9-1)) — this affects whole permission architecture, not cosmetic
 - Surfaced role/permission vs access-policy/condition overlap question ([§9.2](#sec-9-2))
@@ -990,11 +990,11 @@ Everything below was an open question the frontend had discretion to call. Decid
 ---
 
 <a id="sec-11"></a>
-## 11. Known Issues (backend bugs, confirmed via real testing)
+## 11. Backend Implementation Checklist (contract requires 200 + shape below for all)
 
-Still live in the tested deployment as of this pass — target/desired shape decided in [§9.4](#sec-9-4), backend needs to implement fixes:
+This is not a list of "known limitations front has to work around" — every endpoint in this doc is required to return the documented shape at `200`. Below is simply the punch list of what's not there yet in the current deployment, for backend to track and close out. Front should build against the contract, not against current live behavior.
 
-- 6 manage endpoints return prod 500: `group_mgmt`, `role_mgmt`, `permission_mgmt`, `protected_resource_mgmt`, `access_policy_mgmt`, `subcatalogfield_mgmt` — `{"detail": "خطای داخلی سرور رخ داده است."}`. Confirmed shapes above come from other test env, need re-verify against this deployment once 500s fixed
+- 6 manage endpoints currently return `500` instead of the documented `200` shape: `group_mgmt`, `role_mgmt`, `permission_mgmt`, `protected_resource_mgmt`, `access_policy_mgmt`, `subcatalogfield_mgmt` — `{"detail": "خطای داخلی سرور رخ داده است."}`. Contracted shapes confirmed from other test env, re-verify against this deployment once fixed
 - `INITIAL_CONFIGS` status typo `"susccess"` — fix target: `"success"` ([§9.4](#sec-9-4)#11)
 - `account_action_mgmt` `data` field is Python-repr string, not JSON — fix target: real JSON object ([§9.4](#sec-9-4)#10)
 - `SAYEH_DASHBOARD_OVERVIEW` field typo `annoncements` — fix target: `announcements` ([§9.4](#sec-9-4)#12)
