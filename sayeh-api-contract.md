@@ -1,6 +1,6 @@
 # Sayeh API Contract
 
-Version: 0.2.1 (verified — fixes applied, see §10 changelog)
+Version: 0.2.1 (verified — fixes applied, see [§10](#sec-10) changelog)
 Base URL: `https://<host>/bapi`
 Auth: Bearer token (`Authorization: Bearer <token>`)
 
@@ -11,74 +11,80 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 ---
 
+<a id="sec-1"></a>
 ## 1. Auth (`/sayeh/auth/...`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| USER_PERMISSION | GET | `/sayeh/auth/user_permission/` | دسترسی کاربر | DONE — §7.1 |
-| AUTH_SESSIONS | GET | `/sayeh/auth/sessions/` | نشست های فعال من | DONE — §7.2 |
-| AUTH_SESSION_CLOSE | DELETE | `/sayeh/auth/sessions/close/` | خاتمه نشست من | DONE — §7.3 |
-| LOGIN_LOGOUT_REPORT | GET | `/sayeh/auth/login_logout_report/` | گزارش ورود و خروج من | DONE — §7.4 |
-| CHANGE_PASSWORD | POST | `/sayeh/auth/change_password/` | تغییر گذرواژه | DONE — §7.5 |
-| PROFILE | GET | `/sayeh/auth/profile/` | پروفایل | DONE — §7.6 |
-| REGISTRATION_ACCESS | POST | `/sayeh/auth/registration_access/` | (no name) | DONE — §7.7 |
-| REGISTER_USER | POST | `/sayeh/auth/register_user/` | ثبت نام کاربر | PARTIAL — §7.8, body TBD (depends on OTP flow §7.13/§7.14) |
+| USER_PERMISSION | GET | `/sayeh/auth/user_permission/` | دسترسی کاربر | DONE — [§7.1](#sec-7-1) |
+| AUTH_SESSIONS | GET | `/sayeh/auth/sessions/` | نشست های فعال من | DONE — [§7.2](#sec-7-2) |
+| AUTH_SESSION_CLOSE | DELETE | `/sayeh/auth/sessions/close/` | خاتمه نشست من | DONE — [§7.3](#sec-7-3) |
+| LOGIN_LOGOUT_REPORT | GET | `/sayeh/auth/login_logout_report/` | گزارش ورود و خروج من | DONE — [§7.4](#sec-7-4) |
+| CHANGE_PASSWORD | POST | `/sayeh/auth/change_password/` | تغییر گذرواژه | DONE — [§7.5](#sec-7-5) |
+| PROFILE | GET | `/sayeh/auth/profile/` | پروفایل | DONE — [§7.6](#sec-7-6) |
+| REGISTRATION_ACCESS | POST | `/sayeh/auth/registration_access/` | (no name) | DONE — [§7.7](#sec-7-7) |
+| REGISTER_USER | POST | `/sayeh/auth/register_user/` | ثبت نام کاربر | PARTIAL — [§7.8](#sec-7-8), body TBD (depends on OTP flow [§7.13](#sec-7-13)/[§7.14](#sec-7-14)) |
 
 ---
 
+<a id="sec-2"></a>
 ## 2. Manage (`/sayeh/manage/...`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| GROUP_MGMT | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | ⚠ SPEC'D, BLOCKED — prod 500 (§9), PATCH needs backend fix (§9.1: should take profile ids not account ids) — §7.9 |
-| PERMISSION_MGMT | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 (§9) — §7.10 |
-| ROLE_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 (§9) — §7.11 |
-| ACCOUNT_MGMT | GET/POST | `/sayeh/manage/account_mgmt/` | لیست/ایجاد کاربر | DONE — §6.1/§6.1b |
-| ACCOUNT_MGMT | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — §6.1c |
-| ACCOUNT_MGMT_PROFILES | GET/POST/PUT | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — §6.2/§6.2b/§6.2c |
-| PROFILE_GROUPS | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | DONE — §6.3 (confirmed model, see §9.1) |
-| PROFILE_ROLES | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش | DONE — §6.4 |
-| ACCOUNT_MGMT_CONTACT | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — §6.5 |
-| PROTECTED_RESOURCE_MGMT | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | ⚠ SPEC'D, BLOCKED — prod 500 (§9) — §7.12 |
-| SUBCATALOGFIELD_MGMT | GET | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | ⚠ SPEC'D, BLOCKED — prod 500 (§9) — §7.13 |
-| ACCESS_POLICY_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 (§9), + overlaps role model, see §9 — §7.14 |
-| CONDITION_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/condition_mgmt/` | شرایط سیاست دسترسی | DONE — §7.15 |
-| ACCOUNT_ACTION_MGMT | GET | `/sayeh/manage/account_action_mgmt/` | لاگ های فراخوانی وب سرویس | DONE — §7.16, ⚠ `data` field non-JSON, see §9 |
-| IDENTITY_MGMT | — | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | DEPRECATED — see §6.1 |
-| ORG_IDENTITY_MGMT | — | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | DEPRECATED — see §6.2 |
+| GROUP_MGMT | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), PATCH needs backend fix ([§9.1](#sec-9-1): should take profile ids not account ids) — [§7.9](#sec-7-9) |
+| PERMISSION_MGMT | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.10](#sec-7-10) |
+| ROLE_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.11](#sec-7-11) |
+| ACCOUNT_MGMT | GET/POST | `/sayeh/manage/account_mgmt/` | لیست/ایجاد کاربر | DONE — [§6.1](#account_mgmt-get)/[§6.1b](#account_mgmt-post) |
+| ACCOUNT_MGMT | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — [§6.1c](#account_mgmt-put) |
+| ACCOUNT_MGMT_PROFILES | GET/POST/PUT | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — [§6.2](#account_mgmt-profiles-get)/[§6.2b](#account_mgmt-profiles-post)/[§6.2c](#account_mgmt-profiles-put) |
+| PROFILE_GROUPS | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | DONE — [§6.3](#profile-groups-post) (confirmed model, see [§9.1](#sec-9-1)) |
+| PROFILE_ROLES | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش | DONE — [§6.4](#profile-roles-post) |
+| ACCOUNT_MGMT_CONTACT | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — [§6.5](#account_mgmt-contact-put) |
+| PROTECTED_RESOURCE_MGMT | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.12](#sec-7-12) |
+| SUBCATALOGFIELD_MGMT | GET | `/sayeh/manage/subcatalogfield_mgmt/` | فیلد های زیرمجموعه کاتالوگ | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)) — [§7.13](#sec-7-13) |
+| ACCESS_POLICY_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/access_policy_mgmt/` | سیاست های دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 ([§9](#sec-9)), + overlaps role model, see [§9](#sec-9) — [§7.14](#sec-7-14) |
+| CONDITION_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/condition_mgmt/` | شرایط سیاست دسترسی | DONE — [§7.15](#sec-7-15) |
+| ACCOUNT_ACTION_MGMT | GET | `/sayeh/manage/account_action_mgmt/` | لاگ های فراخوانی وب سرویس | DONE — [§7.16](#sec-7-16), ⚠ `data` field non-JSON, see [§9](#sec-9) |
+| IDENTITY_MGMT | — | `/sayeh/manage/identity_mgmt/` | مدیریت هویت کاربران | DEPRECATED — see [§6.1](#account_mgmt-get) |
+| ORG_IDENTITY_MGMT | — | `/sayeh/manage/organization_identity_mgmt/` | مدیریت پروفایل سازمانی | DEPRECATED — see [§6.2](#account_mgmt-profiles-get) |
 
 ---
 
+<a id="sec-3"></a>
 ## 3. Base (`/sayeh/base/...`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| SYSTEM_SUBCATALOG | GET | `/sayeh/base/get_system_subcatalog/` | زیرمجموعه کاتالوگ سیستمی | DONE — §7.17 |
-| CAS_AUDIT_LOG | GET | `/sayeh/base/cas_audit_log/` | لاگ های ورود و خروج سیستم | DONE — §7.18 |
-| CAS_AUDIT_LOG_AGGRS | GET | `/sayeh/base/cas_audit_log_aggrs/` | تجمیع لاگ های احراز هویت | DONE — §7.19 |
-| SEND_OTP | POST | `/sayeh/base/send_otp/` | ارسال کد تایید | PARTIAL — §7.20, body unconfirmed |
-| VALIDATE_OTP | GET | `/sayeh/base/validate_otp/` | اعتبارسنجی کد تایید | PARTIAL — §7.21, query params unconfirmed |
-| INITIAL_CONFIGS | GET | `/sayeh/base/initial_configs/` | اطلاعات اولیه ثبت نام | DONE — §7.22, ⚠ typo in response, see §9 |
+| SYSTEM_SUBCATALOG | GET | `/sayeh/base/get_system_subcatalog/` | زیرمجموعه کاتالوگ سیستمی | DONE — [§7.17](#sec-7-17) |
+| CAS_AUDIT_LOG | GET | `/sayeh/base/cas_audit_log/` | لاگ های ورود و خروج سیستم | DONE — [§7.18](#sec-7-18) |
+| CAS_AUDIT_LOG_AGGRS | GET | `/sayeh/base/cas_audit_log_aggrs/` | تجمیع لاگ های احراز هویت | DONE — [§7.19](#sec-7-19) |
+| SEND_OTP | POST | `/sayeh/base/send_otp/` | ارسال کد تایید | PARTIAL — [§7.20](#sec-7-20), body unconfirmed |
+| VALIDATE_OTP | GET | `/sayeh/base/validate_otp/` | اعتبارسنجی کد تایید | PARTIAL — [§7.21](#sec-7-21), query params unconfirmed |
+| INITIAL_CONFIGS | GET | `/sayeh/base/initial_configs/` | اطلاعات اولیه ثبت نام | DONE — [§7.22](#sec-7-22), ⚠ typo in response, see [§9](#sec-9) |
 
 ---
 
+<a id="sec-4"></a>
 ## 4. Admin (`/sayeh/admin/...`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| SAYEH_DASHBOARD_OVERVIEW | GET | `/sayeh/admin/sayeh_dashboard_overview/` | آمار کلی داشبورد تنظیمات | DONE — §7.23 |
+| SAYEH_DASHBOARD_OVERVIEW | GET | `/sayeh/admin/sayeh_dashboard_overview/` | آمار کلی داشبورد تنظیمات | DONE — [§7.23](#sec-7-23) |
 
 ---
 
+<a id="sec-5"></a>
 ## 5. SSO (`/sayeh/sso/...`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| OIDC_CREDENTIAL | GET | `/sayeh/sso/oidc_credential/` | تنظیمات OIDC (نام قبلی: LOGOUT — نادرست، §9) | DONE — §7.24 |
-| USER_CREDENTIAL_MANAGEMENT | POST | `/sayeh/sso/user_credential_management/` | احراز هویت توکن لاگین متمرکز | PARTIAL — §7.25, body TBD |
+| OIDC_CREDENTIAL | GET | `/sayeh/sso/oidc_credential/` | تنظیمات OIDC (نام قبلی: LOGOUT — نادرست، [§9](#sec-9)) | DONE — [§7.24](#sec-7-24) |
+| USER_CREDENTIAL_MANAGEMENT | POST | `/sayeh/sso/user_credential_management/` | احراز هویت توکن لاگین متمرکز | PARTIAL — [§7.25](#sec-7-25), body TBD |
 
 ---
 
+<a id="sec-6"></a>
 ## 6. Account / Profile Endpoint Details
 
 <a id="account_mgmt-get"></a>
@@ -140,10 +146,10 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 **Changes from raw backend response — why**
 - Dropped `__` prefix flatten (`contact_info__mobile` → `contact.mobile`) — nest instead, easier for front to consume
 - Top-level `identity` object built from `profiles__identity__*` fields
-- Removed account-level `roles`/`role_objects` — per §12 model, roles belong to profile not account, backend leak
-- **Removed account-level `groups`** (was `user_groups_data` in raw response) — per §9.1, group membership confirmed profile-only, this field was a backend leak same category as `roles`. Group info now lives solely under `profile.groups` (§6.2/§6.3)
+- Removed account-level `roles`/`role_objects` — per [§12](#sec-12) model, roles belong to profile not account, backend leak
+- **Removed account-level `groups`** (was `user_groups_data` in raw response) — per [§9.1](#sec-9-1), group membership confirmed profile-only, this field was a backend leak same category as `roles`. Group info now lives solely under `profile.groups` ([§6.2](#account_mgmt-profiles-get)/[§6.3](#profile-groups-post))
 - Dropped `over_view` block — account-list-level stats, not single-account data
-- Dropped `profile_data` array, `total_count`, dup id refs — full profile list moved to §6.2
+- Dropped `profile_data` array, `total_count`, dup id refs — full profile list moved to [§6.2](#account_mgmt-profiles-get)
 - Added `profile` — the `is_default: true` profile embedded inline, front needs active-profile context on load
 - `profiles__identification_code` duplicate of top-level, kept once
 
@@ -188,7 +194,7 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 }
 ```
 
-**Success 201** — same shape as §6.1 GET response
+**Success 201** — same shape as [§6.1](#account_mgmt-get) GET response
 
 **Errors**
 - `422 VALIDATION_ERROR`
@@ -210,9 +216,9 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 **Headers:** `Authorization: Bearer <token>`
 
-**Request body** — full replace, same shape as create (§6.1b), minus `uid` (immutable)
+**Request body** — full replace, same shape as create ([§6.1b](#account_mgmt-post)), minus `uid` (immutable)
 
-**Success 200** — updated resource, same shape as §6.1 GET response
+**Success 200** — updated resource, same shape as [§6.1](#account_mgmt-get) GET response
 
 **Errors**
 - `404 ACCOUNT_NOT_FOUND`
@@ -277,14 +283,14 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 }
 ```
 
-**Success 201** — profile object, same shape as §6.2 list entry plus `roles: []`
+**Success 201** — profile object, same shape as [§6.2](#account_mgmt-profiles-get) list entry plus `roles: []`
 
 **Errors**
 - `422 VALIDATION_ERROR`
 - `404 ACCOUNT_NOT_FOUND`
 - `401 UNAUTHORIZED`
 
-**Notes:** `type` sent as numeric id (matches §7.13 SUBCATALOGFIELD_MGMT catalog `ORG_IDENTITY_TYPE`/similar), returned as text. No `groups`/`roles` in create body, assign after via §6.3/§6.4 (⚠ pending §9 resolution). `is_default: true` should auto-unset previous default, confirm.
+**Notes:** `type` sent as numeric id (matches [§7.13](#sec-7-13) SUBCATALOGFIELD_MGMT catalog `ORG_IDENTITY_TYPE`/similar), returned as text. No `groups`/`roles` in create body, assign after via [§6.3](#profile-groups-post)/[§6.4](#profile-roles-post) (⚠ pending [§9](#sec-9) resolution). `is_default: true` should auto-unset previous default, confirm.
 
 ---
 
@@ -303,21 +309,21 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 }
 ```
 
-**Success 200** — same shape as §6.2b response
+**Success 200** — same shape as [§6.2b](#account_mgmt-profiles-post) response
 
 **Errors**
 - `404 PROFILE_NOT_FOUND`
 - `422 VALIDATION_ERROR`
 - `401 UNAUTHORIZED`
 
-**Notes:** `identification_code` excluded, assume immutable. Same PUT-vs-PATCH question as §6.1c.
+**Notes:** `identification_code` excluded, assume immutable. Same PUT-vs-PATCH question as [§6.1c](#account_mgmt-put).
 
 ---
 
 <a id="profile-groups-post"></a>
-### 6.3 Profile — group assign / unassign — **CONFIRMED per §9.1**
+### 6.3 Profile — group assign / unassign — **CONFIRMED per [§9.1](#sec-9-1)**
 
-Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9) using `sayeh_accounts` is a backend mismatch, flagged to fix — front should NOT call it as-is; use endpoints below.
+Group membership confirmed profile-only ([§9.1](#sec-9-1)). Real `GROUP_MGMT` PATCH ([§7.9](#sec-7-9)) using `sayeh_accounts` is a backend mismatch, flagged to fix — front should NOT call it as-is; use endpoints below.
 
 `POST /sayeh/manage/profile/{profile_id}/groups/`
 ```json
@@ -336,7 +342,7 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 - `409 ALREADY_ASSIGNED` — POST only
 - `401 UNAUTHORIZED`
 
-**Notes:** Assigning group affects aggregated `roles` on profile (§9, group→role inheritance) — refetch profile detail (§6.2) after write, don't compute client-side. Exact route still needs backend confirm/build (not in original URL list) — but semantics (profile joins group) now locked in.
+**Notes:** Assigning group affects aggregated `roles` on profile ([§9](#sec-9), group→role inheritance) — refetch profile detail ([§6.2](#account_mgmt-profiles-get)) after write, don't compute client-side. Exact route still needs backend confirm/build (not in original URL list) — but semantics (profile joins group) now locked in.
 
 ---
 
@@ -360,7 +366,7 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 - `409 ALREADY_ASSIGNED` — POST only
 - `401 UNAUTHORIZED`
 
-**Notes:** Direct role assign only, distinct from group-inherited roles (§6.3/§9). This one not contradicted by real data — roles do live separate from groups per §7.11 ROLE_MGMT shape (`permissions` array on role, no account/profile ref) — assignment endpoint itself still needs real confirm, shape of relationship looks right though.
+**Notes:** Direct role assign only, distinct from group-inherited roles ([§6.3](#profile-groups-post)/[§9](#sec-9)). This one not contradicted by real data — roles do live separate from groups per [§7.11](#sec-7-11) ROLE_MGMT shape (`permissions` array on role, no account/profile ref) — assignment endpoint itself still needs real confirm, shape of relationship looks right though.
 
 ---
 
@@ -388,12 +394,14 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 - `422 VALIDATION_ERROR`
 - `401 UNAUTHORIZED`
 
-**Notes:** `mobile`/`email` excluded on purpose, go through OTP flow (§7.20/§7.21) so `mobile_verified`/`email_verified` stay trustworthy.
+**Notes:** `mobile`/`email` excluded on purpose, go through OTP flow ([§7.20](#sec-7-20)/[§7.21](#sec-7-21)) so `mobile_verified`/`email_verified` stay trustworthy.
 
 ---
 
+<a id="sec-7"></a>
 ## 7. Endpoint Details — Auth / Manage / Base / Admin / SSO
 
+<a id="sec-7-1"></a>
 ### 7.1 USER_PERMISSION
 
 `GET /sayeh/auth/user_permission/`
@@ -409,6 +417,7 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 
 ---
 
+<a id="sec-7-2"></a>
 ### 7.2 AUTH_SESSIONS
 
 `GET /sayeh/auth/sessions/`
@@ -432,6 +441,7 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 
 ---
 
+<a id="sec-7-3"></a>
 ### 7.3 AUTH_SESSION_CLOSE
 
 `DELETE /sayeh/auth/sessions/close/?id={session_id}`
@@ -446,6 +456,7 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 
 ---
 
+<a id="sec-7-4"></a>
 ### 7.4 LOGIN_LOGOUT_REPORT
 
 `GET /sayeh/auth/login_logout_report/`
@@ -470,6 +481,7 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 
 ---
 
+<a id="sec-7-5"></a>
 ### 7.5 CHANGE_PASSWORD
 
 `POST /sayeh/auth/change_password/`
@@ -490,14 +502,16 @@ Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9)
 
 ---
 
+<a id="sec-7-6"></a>
 ### 7.6 PROFILE
 
 `GET /sayeh/auth/profile/`
 
-Same shape as §6.1 GET response — full account+profile+groups+roles for currently authenticated user.
+Same shape as [§6.1](#account_mgmt-get) GET response — full account+profile+groups+roles for currently authenticated user.
 
 ---
 
+<a id="sec-7-7"></a>
 ### 7.7 REGISTRATION_ACCESS
 
 `POST /sayeh/auth/registration_access/`
@@ -516,6 +530,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-8"></a>
 ### 7.8 REGISTER_USER — PARTIAL, body TBD
 
 `POST /sayeh/auth/register_user/`
@@ -526,10 +541,11 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 ```
 **Errors:** `400` — bad params
 
-**Notes:** Requires OTP flow first (§7.20/§7.21). Exact request body depends on registration type (self vs gov) — not yet nailed down, don't build against this until confirmed.
+**Notes:** Requires OTP flow first ([§7.20](#sec-7-20)/[§7.21](#sec-7-21)). Exact request body depends on registration type (self vs gov) — not yet nailed down, don't build against this until confirmed.
 
 ---
 
+<a id="sec-7-9"></a>
 ### 7.9 GROUP_MGMT — ⚠ BLOCKED (prod 500) + model conflict
 
 `GET /sayeh/manage/group_mgmt/?page_size={n}&page={n}`
@@ -550,12 +566,13 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 **DELETE** (`?id={id}`)
 **PATCH** — membership: `{ "sayeh_accounts": [account_id], "action": "ADD_ACCOUNT" | "REMOVE_ACCOUNT" }`
 
-**⚠ Model conflict:** PATCH takes `sayeh_accounts` — accounts join groups directly here, NOT profiles. Contradicts §6.3/§9 assumption that profile is the group-membership unit. See §9 for required decision.
+**⚠ Model conflict:** PATCH takes `sayeh_accounts` — accounts join groups directly here, NOT profiles. Contradicts [§6.3](#profile-groups-post)/[§9](#sec-9) assumption that profile is the group-membership unit. See [§9](#sec-9) for required decision.
 
 **⚠ Currently returns 500 in prod** — `{"detail": "خطای داخلی سرور رخ داده است."}`. Shape above from other test env, unverified against this deployment.
 
 ---
 
+<a id="sec-7-10"></a>
 ### 7.10 PERMISSION_MGMT — ⚠ BLOCKED (prod 500)
 
 `GET /sayeh/manage/permission_mgmt/?page={n}&page_size={n}`
@@ -574,6 +591,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-11"></a>
 ### 7.11 ROLE_MGMT — ⚠ BLOCKED (prod 500)
 
 `GET /sayeh/manage/role_mgmt/?page={n}&page_size={n}`
@@ -597,6 +615,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-12"></a>
 ### 7.12 PROTECTED_RESOURCE_MGMT — ⚠ BLOCKED (prod 500)
 
 `GET /sayeh/manage/protected_resource_mgmt/?page_size={n}&page={n}`
@@ -622,6 +641,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-13"></a>
 ### 7.13 SUBCATALOGFIELD_MGMT
 
 `GET /sayeh/manage/subcatalogfield_mgmt/?catalog__code={code}`
@@ -638,10 +658,11 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 ```
 **Errors:** `400` — `{"status": "FAIL", "message": "catalog_code is required"}`
 
-**Notes:** Backs profile `type` picker (§6.2b) — `catalog__code` values seen: `ORG_IDENTITY_TYPE`, `PROTECTED_RESOURCE_TYPE`.
+**Notes:** Backs profile `type` picker ([§6.2b](#account_mgmt-profiles-post)) — `catalog__code` values seen: `ORG_IDENTITY_TYPE`, `PROTECTED_RESOURCE_TYPE`.
 
 ---
 
+<a id="sec-7-14"></a>
 ### 7.14 ACCESS_POLICY_MGMT — ⚠ BLOCKED (prod 500) + overlaps role model
 
 `GET /sayeh/manage/access_policy_mgmt/?page_size={n}&page={n}`
@@ -658,10 +679,11 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 ```
 **POST/PUT/DELETE** — standard CRUD, see raw fields above.
 
-**⚠ Architecture question:** this is effect+priority+condition based access control (ABAC-ish), separate from role→permission model (§12). Both systems exist simultaneously — unclear if access-policy can override a role grant, is evaluated first/last, or is fully independent layer for a different resource type (protected_resource, not app permission). Needs an architecture decision doc, not just endpoint spec — flag for backend/architect discussion before front builds any policy-editing UI.
+**⚠ Architecture question:** this is effect+priority+condition based access control (ABAC-ish), separate from role→permission model ([§12](#sec-12)). Both systems exist simultaneously — unclear if access-policy can override a role grant, is evaluated first/last, or is fully independent layer for a different resource type (protected_resource, not app permission). Needs an architecture decision doc, not just endpoint spec — flag for backend/architect discussion before front builds any policy-editing UI.
 
 ---
 
+<a id="sec-7-15"></a>
 ### 7.15 CONDITION_MGMT
 
 `GET /sayeh/manage/condition_mgmt/?page_size={n}&page={n}`
@@ -687,6 +709,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-16"></a>
 ### 7.16 ACCOUNT_ACTION_MGMT
 
 `GET /sayeh/manage/account_action_mgmt/?scope={scope}`
@@ -714,6 +737,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-17"></a>
 ### 7.17 SYSTEM_SUBCATALOG
 
 `GET /sayeh/base/get_system_subcatalog/?catalog_code={code}`
@@ -732,6 +756,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-18"></a>
 ### 7.18 CAS_AUDIT_LOG
 
 `GET /sayeh/base/cas_audit_log/?page={n}&page_size={n}`
@@ -744,6 +769,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-19"></a>
 ### 7.19 CAS_AUDIT_LOG_AGGRS
 
 `GET /sayeh/base/cas_audit_log_aggrs/?field={field_name}`
@@ -758,6 +784,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-20"></a>
 ### 7.20 SEND_OTP — body unconfirmed
 
 `POST /sayeh/base/send_otp/`
@@ -774,6 +801,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-21"></a>
 ### 7.21 VALIDATE_OTP — query params unconfirmed
 
 `GET /sayeh/base/validate_otp/`
@@ -786,6 +814,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-22"></a>
 ### 7.22 INITIAL_CONFIGS
 
 `GET /sayeh/base/initial_configs/` — no auth required (public)
@@ -817,6 +846,7 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
+<a id="sec-7-23"></a>
 ### 7.23 SAYEH_DASHBOARD_OVERVIEW
 
 `GET /sayeh/admin/sayeh_dashboard_overview/`
@@ -836,7 +866,8 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
-### 7.24 OIDC_CREDENTIAL (renamed from LOGOUT — see §9)
+<a id="sec-7-24"></a>
+### 7.24 OIDC_CREDENTIAL (renamed from LOGOUT — see [§9](#sec-9))
 
 `GET /sayeh/sso/oidc_credential/`
 
@@ -854,10 +885,11 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
   }
 }
 ```
-**Notes:** Returns OIDC config for SSO integration, used to build OAuth2 authorize URL. This is NOT a logout action despite old code name `LOGOUT` — renamed in table §5, confirmed by response shape.
+**Notes:** Returns OIDC config for SSO integration, used to build OAuth2 authorize URL. This is NOT a logout action despite old code name `LOGOUT` — renamed in table [§5](#sec-5), confirmed by response shape.
 
 ---
 
+<a id="sec-7-25"></a>
 ### 7.25 USER_CREDENTIAL_MANAGEMENT — body TBD
 
 `POST /sayeh/sso/user_credential_management/`
@@ -872,57 +904,64 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ---
 
-## 8. Groups vs Profiles — architecture question (blocking, see §9 for resolution needed)
+<a id="sec-8"></a>
+## 8. Groups vs Profiles — architecture question (blocking, see [§9](#sec-9) for resolution needed)
 
-(see §9 below — kept as pointer since §9 has full detail)
+(see [§9](#sec-9) below — kept as pointer since [§9](#sec-9) has full detail)
 
 ---
 
+<a id="sec-9"></a>
 ## 9. Design Conflicts & Open Decisions — MUST RESOLVE BEFORE BUILD
 
+<a id="sec-9-1"></a>
 ### 9.1 Who joins a group: Account or Profile? — **RESOLVED: Profile**
 
 Confirmed: group membership belongs to **profile only**, not account. This means:
 
-- §6.3 (`PROFILE_GROUPS`, profile joins group) is the **correct, authoritative** design — keep as-is, no longer tentative
-- §7.9 real `GROUP_MGMT` PATCH taking `sayeh_accounts` **contradicts confirmed model** — this is either:
+- [§6.3](#profile-groups-post) (`PROFILE_GROUPS`, profile joins group) is the **correct, authoritative** design — keep as-is, no longer tentative
+- [§7.9](#sec-7-9) real `GROUP_MGMT` PATCH taking `sayeh_accounts` **contradicts confirmed model** — this is either:
   - a backend bug (endpoint should accept profile ids, not account ids — likely just named/wired wrong), or
   - a genuinely different feature (e.g. legacy bulk-assign, or an org-level grouping unrelated to permission-groups) that happens to share the `group_mgmt` path by accident
   - **Action:** flag to backend team as a bug/mismatch — `PATCH .../group_mgmt/` needs to take `sayeh_profiles` (or similar), not `sayeh_accounts`, to match confirmed design. Do not build front UI against the account-based PATCH as-is.
-- §6.1 account-level `groups` field (kept from raw response `user_groups_data`) is now **suspect** — if group membership is profile-only, this field is likely a backend leak/legacy join, same category as the `roles` field we already dropped from account. **Recommend dropping `groups` from account response too** (§6.1), rely on `profile.groups` (via §6.2 profile detail) as sole source of truth. Flag to backend: is `user_groups_data` on the account serializer intentional or leftover?
+- [§6.1](#account_mgmt-get) account-level `groups` field (kept from raw response `user_groups_data`) is now **suspect** — if group membership is profile-only, this field is likely a backend leak/legacy join, same category as the `roles` field we already dropped from account. **Recommend dropping `groups` from account response too** ([§6.1](#account_mgmt-get)), rely on `profile.groups` (via [§6.2](#account_mgmt-profiles-get) profile detail) as sole source of truth. Flag to backend: is `user_groups_data` on the account serializer intentional or leftover?
 
-Permission model (§12) confirmed as originally stated — no further changes needed there.
+Permission model ([§12](#sec-12)) confirmed as originally stated — no further changes needed there.
 
+<a id="sec-9-2"></a>
 ### 9.2 Role/Permission model vs Access-Policy/Condition model — how do they interact?
 
-§7.11 ROLE_MGMT (role → list of permission ids) and §7.14 ACCESS_POLICY_MGMT (effect/priority/condition rules) both look like authorization mechanisms but nothing in the raw data shows them referencing each other. Possibilities:
-- Access-policy is scoped to `protected_resource` only (SSO gateway rules — "can this account reach this external system, and when") while role/permission is for in-app feature permissions — two separate concerns, not overlapping. Field `protected_resource_type: [access_policy: [1,2]]` in §7.12 supports this reading.
+[§7.11](#sec-7-11) ROLE_MGMT (role → list of permission ids) and [§7.14](#sec-7-14) ACCESS_POLICY_MGMT (effect/priority/condition rules) both look like authorization mechanisms but nothing in the raw data shows them referencing each other. Possibilities:
+- Access-policy is scoped to `protected_resource` only (SSO gateway rules — "can this account reach this external system, and when") while role/permission is for in-app feature permissions — two separate concerns, not overlapping. Field `protected_resource_type: [access_policy: [1,2]]` in [§7.12](#sec-7-12) supports this reading.
 - Or they're meant to merge into one evaluation eventually and aren't yet wired together
 
 **Decision needed:** if reading 1 is correct (separate concerns), no conflict, just document clearly and move on. Confirm with backend before assuming.
 
+<a id="sec-9-3"></a>
 ### 9.3 Naming/typo cleanup list (low priority, batch with backend later)
-- `permissions` (GET) vs `permission` (POST/PUT) on ROLE_MGMT — §7.11
-- `STATUS` vs `status` casing — §7.19 vs everywhere else
-- `"susccess"` typo — §7.22
-- `annoncements` typo — §7.23
-- `account_action_mgmt.data` field serialized as Python repr, not JSON — §7.16
+- `permissions` (GET) vs `permission` (POST/PUT) on ROLE_MGMT — [§7.11](#sec-7-11)
+- `STATUS` vs `status` casing — [§7.19](#sec-7-19) vs everywhere else
+- `"susccess"` typo — [§7.22](#sec-7-22)
+- `annoncements` typo — [§7.23](#sec-7-23)
+- `account_action_mgmt.data` field serialized as Python repr, not JSON — [§7.16](#sec-7-16)
 
 ---
 
+<a id="sec-10"></a>
 ## 10. Changelog (this verification pass)
 
 - Fixed Base URL double-`/sayeh` prefix bug
-- Renamed `LOGOUT` → `OIDC_CREDENTIAL` in §5 table (code didn't match actual behavior)
+- Renamed `LOGOUT` → `OIDC_CREDENTIAL` in [§5](#sec-5) table (code didn't match actual behavior)
 - Downgraded status on 4 endpoints from DONE to PARTIAL where body/params still unconfirmed (REGISTER_USER, SEND_OTP, VALIDATE_OTP, USER_CREDENTIAL_MANAGEMENT)
 - Flagged 6 endpoints DONE-but-blocked (prod 500), added ⚠ marker instead of silent DONE
 - Restructured flat `## 1.1`–`## 5.2` headers (wrong heading level, same as top nav) into nested `### 7.x` under one `## 7` parent
-- Surfaced GROUP_MGMT vs PROFILE_GROUPS model conflict as top-priority blocking decision (§9.1) — this affects whole permission architecture, not cosmetic
-- Surfaced role/permission vs access-policy/condition overlap question (§9.2)
-- Catalogued smaller naming/typo issues (§9.3) separately so they don't get lost among bigger conflicts
+- Surfaced GROUP_MGMT vs PROFILE_GROUPS model conflict as top-priority blocking decision ([§9.1](#sec-9-1)) — this affects whole permission architecture, not cosmetic
+- Surfaced role/permission vs access-policy/condition overlap question ([§9.2](#sec-9-2))
+- Catalogued smaller naming/typo issues ([§9.3](#sec-9-3)) separately so they don't get lost among bigger conflicts
 
 ---
 
+<a id="sec-11"></a>
 ## 11. Known Issues (backend bugs, confirmed via real testing)
 
 - 6 manage endpoints return prod 500: `group_mgmt`, `role_mgmt`, `permission_mgmt`, `protected_resource_mgmt`, `access_policy_mgmt`, `subcatalogfield_mgmt` — `{"detail": "خطای داخلی سرور رخ داده است."}`. Confirmed shapes above come from other test env, need re-verify against this deployment once 500s fixed
@@ -935,13 +974,14 @@ Permission model (§12) confirmed as originally stated — no further changes ne
 
 ---
 
-## 12. Permission Model (Design Note) — §9.1 confirmed, §9.2 still open
+<a id="sec-12"></a>
+## 12. Permission Model (Design Note) — [§9.1](#sec-9-1) confirmed, [§9.2](#sec-9-2) still open
 
 **Confirmed (2026-07-20, group-membership resolved 2026-07-22):**
 - Account ↔ Identity: 1:1
 - Account → Profiles: 1:N
-- Profile = permission boundary — group membership confirmed profile-only (§9.1), account has no group/role fields
-- Role assignment: direct (§6.4) + via group inheritance (§6.3)
+- Profile = permission boundary — group membership confirmed profile-only ([§9.1](#sec-9-1)), account has no group/role fields
+- Role assignment: direct ([§6.4](#profile-roles-post)) + via group inheritance ([§6.3](#profile-groups-post))
 - Effective permission = union of direct roles + all inherited roles
 
-Still open: §9.2 (role/permission vs access-policy/condition interaction) — not part of this resolution.
+Still open: [§9.2](#sec-9-2) (role/permission vs access-policy/condition interaction) — not part of this resolution.
