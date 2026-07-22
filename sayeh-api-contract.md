@@ -30,13 +30,13 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 
 | Code | Method | Path | Name (fa) | Status |
 |---|---|---|---|---|
-| GROUP_MGMT | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | ⚠ SPEC'D, BLOCKED — prod 500 (§9), + model conflict (§9) — §7.9 |
+| GROUP_MGMT | GET/POST/PUT/DELETE/PATCH | `/sayeh/manage/group_mgmt/` | گروه های کاربری | ⚠ SPEC'D, BLOCKED — prod 500 (§9), PATCH needs backend fix (§9.1: should take profile ids not account ids) — §7.9 |
 | PERMISSION_MGMT | GET | `/sayeh/manage/permission_mgmt/` | لیست دسترسی سطوح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 (§9) — §7.10 |
 | ROLE_MGMT | GET/POST/PUT/DELETE | `/sayeh/manage/role_mgmt/` | سطح دسترسی | ⚠ SPEC'D, BLOCKED — prod 500 (§9) — §7.11 |
 | ACCOUNT_MGMT | GET/POST | `/sayeh/manage/account_mgmt/` | لیست/ایجاد کاربر | DONE — §6.1/§6.1b |
 | ACCOUNT_MGMT | PUT | `/sayeh/manage/account_mgmt/{id}/` | ویرایش کاربر | DONE — §6.1c |
 | ACCOUNT_MGMT_PROFILES | GET/POST/PUT | `/sayeh/manage/account_mgmt/{id}/profiles/` | پروفایل کاربر | DONE — §6.2/§6.2b/§6.2c |
-| PROFILE_GROUPS | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | ⚠ DESIGN CONFLICT — see §9, contradicts real GROUP_MGMT PATCH behavior — §6.3 |
+| PROFILE_GROUPS | POST/DELETE | `/sayeh/manage/profile/{profile_id}/groups/` | تخصیص/حذف گروه | DONE — §6.3 (confirmed model, see §9.1) |
 | PROFILE_ROLES | POST/DELETE | `/sayeh/manage/profile/{profile_id}/roles/` | تخصیص/حذف نقش | DONE — §6.4 |
 | ACCOUNT_MGMT_CONTACT | PUT | `/sayeh/manage/account_mgmt/{id}/contact/` | ویرایش اطلاعات تماس | DONE — §6.5 |
 | PROTECTED_RESOURCE_MGMT | GET | `/sayeh/manage/protected_resource_mgmt/` | سامانه‌های حفاظت شده | ⚠ SPEC'D, BLOCKED — prod 500 (§9) — §7.12 |
@@ -123,9 +123,6 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
     "birth_date": "2026-07-06",
     "national_code": "0012345678"
   },
-  "groups": [
-    { "id": 1, "title": "کارکنان", "code": "personel Department" }
-  ],
   "profile": {
     "id": 13,
     "title": "علی موسوی",
@@ -144,14 +141,13 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 - Dropped `__` prefix flatten (`contact_info__mobile` → `contact.mobile`) — nest instead, easier for front to consume
 - Top-level `identity` object built from `profiles__identity__*` fields
 - Removed account-level `roles`/`role_objects` — per §12 model, roles belong to profile not account, backend leak
+- **Removed account-level `groups`** (was `user_groups_data` in raw response) — per §9.1, group membership confirmed profile-only, this field was a backend leak same category as `roles`. Group info now lives solely under `profile.groups` (§6.2/§6.3)
 - Dropped `over_view` block — account-list-level stats, not single-account data
 - Dropped `profile_data` array, `total_count`, dup id refs — full profile list moved to §6.2
 - Added `profile` — the `is_default: true` profile embedded inline, front needs active-profile context on load
 - `profiles__identification_code` duplicate of top-level, kept once
 
 **Edge case:** account with zero profiles — `profile` should be `null`, front must handle "no active profile" state.
-
-**⚠ Open conflict with real data (see §9):** account-level `groups` field kept here still ambiguous whether it's directory/org grouping metadata (`user_groups_data` in raw response) or the SAME permission-group system as §6.3/§9. Real `GROUP_MGMT` backend takes `sayeh_accounts` directly (accounts join groups, not profiles) — if that's the true model, this `groups` field is correct as-is and §6.3 (`PROFILE_GROUPS`) should be deprecated instead. Needs resolve before build, see §9.
 
 ---
 
@@ -319,15 +315,28 @@ Auth: Bearer token (`Authorization: Bearer <token>`)
 ---
 
 <a id="profile-groups-post"></a>
-### 6.3 Profile — group assign / unassign
+### 6.3 Profile — group assign / unassign — **CONFIRMED per §9.1**
 
-**⚠ STATUS: DESIGN CONFLICT, NOT CONFIRMED — see §9.** Real `GROUP_MGMT` (§7.9) uses `PATCH` with `sayeh_accounts` array to add ACCOUNTS to a group directly. This section assumed PROFILE joins group instead. One of the two is wrong — do not implement both, pick one after backend confirms, see §9 for decision needed.
+Group membership confirmed profile-only (§9.1). Real `GROUP_MGMT` PATCH (§7.9) using `sayeh_accounts` is a backend mismatch, flagged to fix — front should NOT call it as-is; use endpoints below.
 
-`POST /sayeh/manage/profile/{profile_id}/groups/` (tentative, unconfirmed)
+`POST /sayeh/manage/profile/{profile_id}/groups/`
 ```json
 { "group_id": 1 }
 ```
-`DELETE /sayeh/manage/profile/{profile_id}/groups/{group_id}/` (tentative, unconfirmed)
+**Success 201**
+```json
+{ "id": 1, "title": "کارکنان" }
+```
+
+`DELETE /sayeh/manage/profile/{profile_id}/groups/{group_id}/`
+**Success 204** — no body
+
+**Errors (both)**
+- `404 PROFILE_NOT_FOUND` / `404 GROUP_NOT_FOUND`
+- `409 ALREADY_ASSIGNED` — POST only
+- `401 UNAUTHORIZED`
+
+**Notes:** Assigning group affects aggregated `roles` on profile (§9, group→role inheritance) — refetch profile detail (§6.2) after write, don't compute client-side. Exact route still needs backend confirm/build (not in original URL list) — but semantics (profile joins group) now locked in.
 
 ---
 
@@ -871,17 +880,18 @@ Same shape as §6.1 GET response — full account+profile+groups+roles for curre
 
 ## 9. Design Conflicts & Open Decisions — MUST RESOLVE BEFORE BUILD
 
-### 9.1 Who joins a group: Account or Profile?
+### 9.1 Who joins a group: Account or Profile? — **RESOLVED: Profile**
 
-Two contradicting sources in this doc:
-- §6.3 (my earlier design) assumes **profile** joins a group — `POST /sayeh/manage/profile/{profile_id}/groups/`
-- §7.9 real backend `GROUP_MGMT` PATCH takes **`sayeh_accounts`** array — accounts join groups directly, no profile in the payload at all
+Confirmed: group membership belongs to **profile only**, not account. This means:
 
-These can't both be true. Also affects §6.1's account-level `groups` field (kept from raw response) — if accounts really do join groups directly, that field is correct as designed and doesn't need moving to profile.
+- §6.3 (`PROFILE_GROUPS`, profile joins group) is the **correct, authoritative** design — keep as-is, no longer tentative
+- §7.9 real `GROUP_MGMT` PATCH taking `sayeh_accounts` **contradicts confirmed model** — this is either:
+  - a backend bug (endpoint should accept profile ids, not account ids — likely just named/wired wrong), or
+  - a genuinely different feature (e.g. legacy bulk-assign, or an org-level grouping unrelated to permission-groups) that happens to share the `group_mgmt` path by accident
+  - **Action:** flag to backend team as a bug/mismatch — `PATCH .../group_mgmt/` needs to take `sayeh_profiles` (or similar), not `sayeh_accounts`, to match confirmed design. Do not build front UI against the account-based PATCH as-is.
+- §6.1 account-level `groups` field (kept from raw response `user_groups_data`) is now **suspect** — if group membership is profile-only, this field is likely a backend leak/legacy join, same category as the `roles` field we already dropped from account. **Recommend dropping `groups` from account response too** (§6.1), rely on `profile.groups` (via §6.2 profile detail) as sole source of truth. Flag to backend: is `user_groups_data` on the account serializer intentional or leftover?
 
-**Decision needed:** confirm with backend which is authoritative. Once known:
-- If account-level: deprecate §6.3 entirely, keep §6.1 `groups` as-is, permission model (§12) simplifies to account→group→role (profile only holds direct roles, no group inheritance)
-- If profile-level: §7.9 PATCH `sayeh_accounts` is a legacy/different feature (maybe org-membership grouping, distinct from permission-groups) — needs separate naming to avoid confusion (e.g. rename this one `org_group_mgmt` vs `permission_group_mgmt`)
+Permission model (§12) confirmed as originally stated — no further changes needed there.
 
 ### 9.2 Role/Permission model vs Access-Policy/Condition model — how do they interact?
 
@@ -925,11 +935,13 @@ These can't both be true. Also affects §6.1's account-level `groups` field (kep
 
 ---
 
-## 12. Permission Model (Design Note) — pending §9.1/§9.2 resolution
+## 12. Permission Model (Design Note) — §9.1 confirmed, §9.2 still open
 
-**Confirmed (2026-07-20), still needs §9 conflicts resolved before treating as final:**
+**Confirmed (2026-07-20, group-membership resolved 2026-07-22):**
 - Account ↔ Identity: 1:1
 - Account → Profiles: 1:N
-- Profile = permission boundary (assumes §9.1 resolves to profile-level group membership — if it resolves to account-level instead, this line changes)
-- Role assignment: direct + via group inheritance (mechanism for "via group" now uncertain per §9.1)
+- Profile = permission boundary — group membership confirmed profile-only (§9.1), account has no group/role fields
+- Role assignment: direct (§6.4) + via group inheritance (§6.3)
 - Effective permission = union of direct roles + all inherited roles
+
+Still open: §9.2 (role/permission vs access-policy/condition interaction) — not part of this resolution.
